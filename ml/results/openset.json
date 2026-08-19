@@ -1,0 +1,21 @@
+{
+  "single_view": {
+    "n_train": 3021,
+    "n_test": 1204,
+    "overall_detection_rate": 0.5930232558139535,
+    "per_label_detection_rate": {
+      "5": 0.8951747088186356,
+      "6": 0.29187396351575456
+    }
+  },
+  "cross_layer": {
+    "n_train": 1018,
+    "n_test": 400,
+    "overall_detection_rate": 0.5025,
+    "per_label_detection_rate": {
+      "5": 1.0,
+      "6": 0.005
+    }
+  },
+  "cross_layer_transfers_better": false
+}

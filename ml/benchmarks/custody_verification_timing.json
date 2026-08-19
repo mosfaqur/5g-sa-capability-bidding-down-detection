@@ -1,0 +1,125 @@
+{
+  "log_path": "/root/comp997/chain_of_custody.log",
+  "total_records": 8511,
+  "malformed_lines_skipped": 0,
+  "chain_hash_verification": {
+    "elapsed_seconds": 0.004825359006645158,
+    "cpu_percent": 0.0,
+    "records_verified": 8511,
+    "breaks_found": 0,
+    "break_detail": [],
+    "records_per_second": 1763806.5868838415
+  },
+  "file_hash_reverification": {
+    "elapsed_seconds": 118.76692799900775,
+    "cpu_percent": 52.3,
+    "files_checked": 8425,
+    "files_matched": 8392,
+    "files_mismatched": 33,
+    "files_missing_from_disk": 86,
+    "hash_match_rate": 0.9960830860534124,
+    "mismatch_detail": [
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "cbda52a8f4055251448be58d1f49a96a3317e10b29749c1d2f929fd8c8b93c2c",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "8e05cb7d4a06114c4ef6df2d77073006288f6745de78e8e6da461fed5acb2250",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "logs/transcripts/INDEX.md",
+        "expected": "8cab95b4a5ff77546b8ff9793df9a895b325e07024418a40549e9eecb6d61011",
+        "found": "0e2fde9145f14265f4830c8ad2484f58e06c5a829fee3fec1f516d5b68486c5c"
+      },
+      {
+        "path": "logs/transcripts/INDEX.md",
+        "expected": "ce4ba62c00324812d2f9efc511663289e0d7ca0650a011505a96801ba8bfbdf4",
+        "found": "0e2fde9145f14265f4830c8ad2484f58e06c5a829fee3fec1f516d5b68486c5c"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "6d6d46aefe4c23769fdc627b68319ed472c660b1187dd9b90f0088422457b8c2",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "098dbfdf8b0f1709df370f3920bdc02bd442d40f436acff3f3eba4317db7272b",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "101faad83e04962db6dc8bd0c8881dbdc090c5fb0ca57d2f823387581f765f45",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "e5afba0b9722438a631485ecda5e81fda5cfaabd6a5d4168b08725ca30c44cd9",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "56ad97b033933941e285d95772304cae00e39ff5cff8fa5fe7d9f1ed84c73957",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "0e6097a3b664e62e2d9258b7231caebd4ebdef6d7eb366c20781b6824df4e3c0",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "bc83185b0d50cd8af6f8fc92a3567c05edf5185169d12290171366106d269e57",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "f7cc9453360b283213e0f507b1d59b73e7014d3099f77eedb609087ef08ed7fc",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "2bf7fd3ea758180cf645f20a9d161cf1f7514e75feb9c709dd520976802844e8",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "36a47c99117a04159ea04854fe22fafac5a27221828f55ee0842e364d7123134",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "0301e1b412cb4847ac47b29cee6f71d0132cb7d8bb459469370c934453593c67",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "2b0684a101f0583b6d3ca37aab02971c75eff43d9867bf22b6523bac70ece0c2",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "85e2645f4826c05fcc1db4628db91c4b7863ce1af5bb2250237ad8a4d081a704",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "4a6402193684366f5a39df3f81019baeb6609a378df154d576fcf93ffd5f294b",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "analysis/exhibits/INDEX.md",
+        "expected": "5c4ff753b933ca24af379749c918118000f3b51c754d5e53aead707cfc33dea2",
+        "found": "07c9904f0ac9bef3b1ef52ce483ac5d03949960074d4e66c397260824bbad954"
+      },
+      {
+        "path": "logs/transcripts/B_session.jsonl",
+        "expected": "7d3d51053786042a952eeab6eb0def1b5a52fa75dd35c15359f4f367ac5180ff",
+        "found": "34b41df77e0566ffee2efacbf114f18b28a7f1d9ce2a689b571955696c63ca32"
+      }
+    ]
+  },
+  "total_elapsed_seconds": 118.7717533580144
+}

@@ -1,0 +1,16 @@
+{
+  "n_events_replayed": 100,
+  "decode_to_classification_ms": {
+    "mean": 250.78286793002917,
+    "p95": 397.7607723958499,
+    "max": 422.78382000222337
+  },
+  "session_a_mean_proxy_forward_latency_ms": 0.8528970311027332,
+  "operational_ceiling_ms": 1000,
+  "full_arrival_to_classification_ms": {
+    "mean": 251.6357649611319,
+    "p95": 398.61366942695264,
+    "max": 423.6367170333261
+  },
+  "under_ceiling": true
+}

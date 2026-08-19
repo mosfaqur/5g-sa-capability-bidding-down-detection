@@ -1,0 +1,24 @@
+mcc: '001'          # matches the private testbed PLMN (the project's internal build log)
+mnc: '01'
+
+nci: '0x000000010'  # NR Cell Identity (36-bit)
+idLength: 32        # NR gNB ID length in bits [22...32]
+tac: 1              # Tracking Area Code
+
+linkIp: 127.0.0.1   # gNB's local IP address for Radio Link Simulation (Usually same with local IP)
+ngapIp: 127.0.0.1   # gNB's local IP address for N2 Interface (Usually same with local IP)
+gtpIp: 127.0.0.1    # gNB's local IP address for N3 Interface (Usually same with local IP)
+
+# List of AMF address information - points at ngap_proxy.py (127.0.0.5:38412),
+# same standard N2 port the real srsRAN gNB also targets. The proxy forwards to
+# the real AMF on 127.0.0.5:38413.
+amfConfigs:
+  - address: 127.0.0.5
+    port: 38412
+
+# List of supported S-NSSAIs by this gNB
+slices:
+  - sst: 1
+
+# Indicates whether or not SCTP stream number errors should be ignored.
+ignoreStreamIds: true

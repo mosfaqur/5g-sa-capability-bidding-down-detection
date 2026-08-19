@@ -1,0 +1,428 @@
+# Decoded UERadioCapabilityInfoIndication exhibit — mode 2 (CA-disabled)
+# Source: data/raw/validation/ngap_swstd_label2_full.pcap
+# Frames found (frame_number, dst_port): ['39\t38412', '40\t38413']
+# Port 38412 = gNB-facing leg (pre-rewrite); port 38413 = AMF-facing leg (post-rewrite, what the AMF actually cached)
+#==============================================================================
+
+
+
+================================================================================
+FRAME 39 (dst_port=38412, PRE-REWRITE / gNB leg)
+================================================================================
+
+Frame 39: Packet, 294 bytes on wire (2352 bits), 294 bytes captured (2352 bits)
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Jul 30, 2026 19:56:36.990435000 NZST
+    UTC Arrival Time: Jul 30, 2026 07:56:36.990435000 UTC
+    Epoch Arrival Time: 1785398196.990435000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 30.000 microseconds]
+    [Time since reference or first frame: 4.230437000 seconds]
+    Frame Number: 39
+    Frame Length: 294 bytes (2352 bits)
+    Capture Length: 294 bytes (2352 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:sctp:ngap:ngap:nr-rrc:ngap:ngap:nas-5gs:ngap:ngap:nas-5gs]
+    Character encoding: ASCII (0)
+Ethernet II, Src: 00:00:00_00:00:00 (00:00:00:00:00:00), Dst: 00:00:00_00:00:00 (00:00:00:00:00:00)
+    Destination: 00:00:00_00:00:00 (00:00:00:00:00:00)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: 00:00:00_00:00:00 (00:00:00:00:00:00)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 127.0.0.1, Dst: 127.0.0.5
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x02 (DSCP: CS0, ECN: ECT(0))
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..10 = Explicit Congestion Notification: ECN-Capable Transport codepoint '10' (2)
+    Total Length: 280
+    Identification: 0x0000 (0)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 64
+    Protocol: SCTP (132)
+    Header Checksum: 0x3b5a [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 127.0.0.1
+    Destination Address: 127.0.0.5
+    [Stream index: 0]
+Stream Control Transmission Protocol, Src Port: 54364 (54364), Dst Port: 38412 (38412)
+    Source port: 54364
+    Destination port: 38412
+    Verification tag: 0x41ad481d
+    [Association index: disabled (enable in preferences)]
+    Checksum: 0x00000000 [unverified]
+    [Checksum Status: Unverified]
+    DATA chunk (ordered, complete segment, TSN: 5, SID: 1, SSN: 4, PPID: 60, payload length: 38 bytes)
+        Chunk type: DATA (0)
+            0... .... = Bit: Stop processing of the packet
+            .0.. .... = Bit: Do not report
+        Chunk flags: 0x03
+            .... 0... = I-Bit: Possibly delay SACK
+            .... .0.. = U-Bit: Ordered delivery
+            .... ..1. = B-Bit: First segment
+            .... ...1 = E-Bit: Last segment
+        Chunk length: 54
+        Transmission sequence number (relative): 5
+        Transmission sequence number (absolute): 3768570863
+        Stream identifier: 0x0001
+        Stream sequence number: 4
+        Payload protocol identifier: NGAP (60)
+        Chunk padding: 0000
+NG Application Protocol (UERadioCapabilityInfoIndication)
+    NGAP-PDU: initiatingMessage (0)
+        initiatingMessage
+            procedureCode: id-UERadioCapabilityInfoIndication (44)
+            criticality: ignore (1)
+            value
+                UERadioCapabilityInfoIndication
+                    protocolIEs: 3 items
+                        Item 0: id-AMF-UE-NGAP-ID
+                            ProtocolIE-Field
+                                id: id-AMF-UE-NGAP-ID (10)
+                                criticality: reject (0)
+                                value
+                                    AMF-UE-NGAP-ID: 2
+                        Item 1: id-RAN-UE-NGAP-ID
+                            ProtocolIE-Field
+                                id: id-RAN-UE-NGAP-ID (85)
+                                criticality: reject (0)
+                                value
+                                    RAN-UE-NGAP-ID: 1
+                        Item 2: id-UERadioCapability
+                            ProtocolIE-Field
+                                id: id-UERadioCapability (117)
+                                criticality: ignore (1)
+                                value
+                                    UERadioCapability: 006080a0000000000000000009a0
+                                        UERadioAccessCapabilityInformation
+                                            criticalExtensions: c1 (0)
+                                                c1: ueRadioAccessCapabilityInformation (0)
+                                                    ueRadioAccessCapabilityInformation
+                                                        ue-RadioAccessCapabilityInfo: 101400000000000000000134
+                                                            UE-CapabilityRAT-ContainerList: 1 item
+                                                                Item 0
+                                                                    UE-CapabilityRAT-Container
+                                                                        rat-Type: nr (0)
+                                                                        ue-CapabilityRAT-Container: 0000000000000000009a
+                                                                            UE-NR-Capability
+                                                                                accessStratumRelease: rel15 (0)
+                                                                                pdcp-Parameters
+                                                                                    supportedROHC-Profiles
+                                                                                        .... ..0. profile0x0000: False
+                                                                                        .... ...0 profile0x0001: False
+                                                                                        0... .... profile0x0002: False
+                                                                                        .0.. .... profile0x0003: False
+                                                                                        ..0. .... profile0x0004: False
+                                                                                        ...0 .... profile0x0006: False
+                                                                                        .... 0... profile0x0101: False
+                                                                                        .... .0.. profile0x0102: False
+                                                                                        .... ..0. profile0x0103: False
+                                                                                        .... ...0 profile0x0104: False
+                                                                                    maxNumberROHC-ContextSessions: cs2 (0)
+                                                                                phy-Parameters
+                                                                                rf-Parameters
+                                                                                    supportedBandListNR: 1 item
+                                                                                        Item 0
+                                                                                            BandNR
+                                                                                                bandNR: 78
+Stream Control Transmission Protocol
+    DATA chunk (ordered, complete segment, TSN: 6, SID: 1, SSN: 5, PPID: 60, payload length: 57 bytes)
+        Chunk type: DATA (0)
+            0... .... = Bit: Stop processing of the packet
+            .0.. .... = Bit: Do not report
+        Chunk flags: 0x03
+            .... 0... = I-Bit: Possibly delay SACK
+            .... .0.. = U-Bit: Ordered delivery
+            .... ..1. = B-Bit: First segment
+            .... ...1 = E-Bit: Last segment
+        Chunk length: 73
+        Transmission sequence number (relative): 6
+        Transmission sequence number (absolute): 3768570864
+        Stream identifier: 0x0001
+        Stream sequence number: 5
+        Payload protocol identifier: NGAP (60)
+        Chunk padding: 000000
+NG Application Protocol (UplinkNASTransport)
+    NGAP-PDU: initiatingMessage (0)
+        initiatingMessage
+            procedureCode: id-UplinkNASTransport (46)
+            criticality: ignore (1)
+            value
+                UplinkNASTransport
+                    protocolIEs: 4 items
+                        Item 0: id-AMF-UE-NGAP-ID
+                            ProtocolIE-Field
+                                id: id-AMF-UE-NGAP-ID (10)
+                                criticality: reject (0)
+                                value
+                                    AMF-UE-NGAP-ID: 2
+                        Item 1: id-RAN-UE-NGAP-ID
+                            ProtocolIE-Field
+                                id: id-RAN-UE-NGAP-ID (85)
+                                criticality: reject (0)
+                                value
+                                    RAN-UE-NGAP-ID: 1
+                        Item 2: id-NAS-PDU
+                            ProtocolIE-Field
+                                id: id-NAS-PDU (38)
+                                criticality: reject (0)
+                                value
+                                    NAS-PDU: 7e0247d16a32017e0043
+                                        Non-Access-Stratum 5GS (NAS)PDU
+                                            Security protected NAS 5GS message
+                                                Extended protocol discriminator: 5G mobility management messages (126)
+                                                0000 .... = Spare Half Octet: 0
+                                                .... 0010 = Security header type: Integrity protected and ciphered (2)
+                                                Message authentication code: 0x47d16a32
+                                                Sequence number: 1
+                                            Encrypted data
+                        Item 3: id-UserLocationInformation
+                            ProtocolIE-Field
+                                id: id-UserLocationInformation (121)
+                                criticality: ignore (1)
+                                value
+                                    UserLocationInformation: userLocationInformationNR (1)
+                                        userLocationInformationNR
+                                            nR-CGI
+                                                pLMNIdentity: 00f110
+                                                    Mobile Country Code (MCC): Test network (001)
+                                                    Mobile Network Code (MNC): Test network (01)
+                                                0000 0000 0000 0000 0000 0000 0000 0001 0000 .... = nRCellIdentity: 0x000000010
+                                            tAI
+                                                pLMNIdentity: 00f110
+                                                    Mobile Country Code (MCC): Test network (001)
+                                                    Mobile Network Code (MNC): Test network (01)
+                                                tAC: 1 (0x000001)
+                                            timeStamp: ee158234 (Jul 30, 2026 07:56:36 UTC)
+Stream Control Transmission Protocol
+    DATA chunk (ordered, complete segment, TSN: 7, SID: 1, SSN: 6, PPID: 60, payload length: 98 bytes)
+        Chunk type: DATA (0)
+            0... .... = Bit: Stop processing of the packet
+            .0.. .... = Bit: Do not report
+        Chunk flags: 0x03
+            .... 0... = I-Bit: Possibly delay SACK
+            .... .0.. = U-Bit: Ordered delivery
+            .... ..1. = B-Bit: First segment
+            .... ...1 = E-Bit: Last segment
+        Chunk length: 114
+        Transmission sequence number (relative): 7
+        Transmission sequence number (absolute): 3768570865
+        Stream identifier: 0x0001
+        Stream sequence number: 6
+        Payload protocol identifier: NGAP (60)
+        Chunk padding: 0000
+NG Application Protocol (UplinkNASTransport)
+    NGAP-PDU: initiatingMessage (0)
+        initiatingMessage
+            procedureCode: id-UplinkNASTransport (46)
+            criticality: ignore (1)
+            value
+                UplinkNASTransport
+                    protocolIEs: 4 items
+                        Item 0: id-AMF-UE-NGAP-ID
+                            ProtocolIE-Field
+                                id: id-AMF-UE-NGAP-ID (10)
+                                criticality: reject (0)
+                                value
+                                    AMF-UE-NGAP-ID: 2
+                        Item 1: id-RAN-UE-NGAP-ID
+                            ProtocolIE-Field
+                                id: id-RAN-UE-NGAP-ID (85)
+                                criticality: reject (0)
+                                value
+                                    RAN-UE-NGAP-ID: 1
+                        Item 2: id-NAS-PDU
+                            ProtocolIE-Field
+                                id: id-NAS-PDU (38)
+                                criticality: reject (0)
+                                value
+                                    NAS-PDU: 7e02cbd8db99027e00670100152e0101c1ffff91a12801007b000780000a00000d00120181220101250908696e7465726e6574
+                                        Non-Access-Stratum 5GS (NAS)PDU
+                                            Security protected NAS 5GS message
+                                                Extended protocol discriminator: 5G mobility management messages (126)
+                                                0000 .... = Spare Half Octet: 0
+                                                .... 0010 = Security header type: Integrity protected and ciphered (2)
+                                                Message authentication code: 0xcbd8db99
+                                                Sequence number: 2
+                                            Encrypted data
+                        Item 3: id-UserLocationInformation
+                            ProtocolIE-Field
+                                id: id-UserLocationInformation (121)
+                                criticality: ignore (1)
+                                value
+                                    UserLocationInformation: userLocationInformationNR (1)
+                                        userLocationInformationNR
+                                            nR-CGI
+                                                pLMNIdentity: 00f110
+                                                    Mobile Country Code (MCC): Test network (001)
+                                                    Mobile Network Code (MNC): Test network (01)
+                                                0000 0000 0000 0000 0000 0000 0000 0001 0000 .... = nRCellIdentity: 0x000000010
+                                            tAI
+                                                pLMNIdentity: 00f110
+                                                    Mobile Country Code (MCC): Test network (001)
+                                                    Mobile Network Code (MNC): Test network (01)
+                                                tAC: 1 (0x000001)
+                                            timeStamp: ee158234 (Jul 30, 2026 07:56:36 UTC)
+
+
+
+================================================================================
+FRAME 40 (dst_port=38413, POST-REWRITE / AMF leg (cached))
+================================================================================
+
+Frame 40: Packet, 110 bytes on wire (880 bits), 110 bytes captured (880 bits)
+    Encapsulation type: Ethernet (1)
+    Arrival Time: Jul 30, 2026 19:56:36.992379000 NZST
+    UTC Arrival Time: Jul 30, 2026 07:56:36.992379000 UTC
+    Epoch Arrival Time: 1785398196.992379000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 1.944000 milliseconds]
+    [Time since reference or first frame: 4.232381000 seconds]
+    Frame Number: 40
+    Frame Length: 110 bytes (880 bits)
+    Capture Length: 110 bytes (880 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: eth:ethertype:ip:sctp:ngap:ngap:nr-rrc]
+    Character encoding: ASCII (0)
+Ethernet II, Src: 00:00:00_00:00:00 (00:00:00:00:00:00), Dst: 00:00:00_00:00:00 (00:00:00:00:00:00)
+    Destination: 00:00:00_00:00:00 (00:00:00:00:00:00)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Source: 00:00:00_00:00:00 (00:00:00:00:00:00)
+        .... ..0. .... .... .... .... = LG bit: Globally unique address (factory default)
+        .... ...0 .... .... .... .... = IG bit: Individual address (unicast)
+    Type: IPv4 (0x0800)
+    [Stream index: 0]
+Internet Protocol Version 4, Src: 127.0.0.1, Dst: 127.0.0.5
+    0100 .... = Version: 4
+    .... 0101 = Header Length: 20 bytes (5)
+    Differentiated Services Field: 0x02 (DSCP: CS0, ECN: ECT(0))
+        0000 00.. = Differentiated Services Codepoint: Default (0)
+        .... ..10 = Explicit Congestion Notification: ECN-Capable Transport codepoint '10' (2)
+    Total Length: 96
+    Identification: 0x000b (11)
+    010. .... = Flags: 0x2, Don't fragment
+        0... .... = Reserved bit: Not set
+        .1.. .... = Don't fragment: Set
+        ..0. .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment Offset: 0
+    Time to Live: 64
+    Protocol: SCTP (132)
+    Header Checksum: 0x3c07 [validation disabled]
+    [Header checksum status: Unverified]
+    Source Address: 127.0.0.1
+    Destination Address: 127.0.0.5
+    [Stream index: 0]
+Stream Control Transmission Protocol, Src Port: 33630 (33630), Dst Port: 38413 (38413)
+    Source port: 33630
+    Destination port: 38413
+    Verification tag: 0xf511d6e5
+    [Association index: disabled (enable in preferences)]
+    Checksum: 0x00000000 [unverified]
+    [Checksum Status: Unverified]
+    DATA chunk (ordered, complete segment, TSN: 5, SID: 1, SSN: 4, PPID: 60, payload length: 48 bytes)
+        Chunk type: DATA (0)
+            0... .... = Bit: Stop processing of the packet
+            .0.. .... = Bit: Do not report
+        Chunk flags: 0x03
+            .... 0... = I-Bit: Possibly delay SACK
+            .... .0.. = U-Bit: Ordered delivery
+            .... ..1. = B-Bit: First segment
+            .... ...1 = E-Bit: Last segment
+        Chunk length: 64
+        Transmission sequence number (relative): 5
+        Transmission sequence number (absolute): 593910201
+        Stream identifier: 0x0001
+        Stream sequence number: 4
+        Payload protocol identifier: NGAP (60)
+NG Application Protocol (UERadioCapabilityInfoIndication)
+    NGAP-PDU: initiatingMessage (0)
+        initiatingMessage
+            procedureCode: id-UERadioCapabilityInfoIndication (44)
+            criticality: ignore (1)
+            value
+                UERadioCapabilityInfoIndication
+                    protocolIEs: 3 items
+                        Item 0: id-AMF-UE-NGAP-ID
+                            ProtocolIE-Field
+                                id: id-AMF-UE-NGAP-ID (10)
+                                criticality: reject (0)
+                                value
+                                    AMF-UE-NGAP-ID: 2
+                        Item 1: id-RAN-UE-NGAP-ID
+                            ProtocolIE-Field
+                                id: id-RAN-UE-NGAP-ID (85)
+                                criticality: reject (0)
+                                value
+                                    RAN-UE-NGAP-ID: 1
+                        Item 2: id-UERadioCapability
+                            ProtocolIE-Field
+                                id: id-UERadioCapability (117)
+                                criticality: ignore (1)
+                                value
+                                    UERadioCapability: 00b08140120000000000000009a500195140052a8a242000
+                                        UERadioAccessCapabilityInformation
+                                            criticalExtensions: c1 (0)
+                                                c1: ueRadioAccessCapabilityInformation (0)
+                                                    ueRadioAccessCapabilityInformation
+                                                        ue-RadioAccessCapabilityInfo: 102802400000000000000134a0032a2800a551448400
+                                                            UE-CapabilityRAT-ContainerList: 1 item
+                                                                Item 0
+                                                                    UE-CapabilityRAT-Container
+                                                                        rat-Type: nr (0)
+                                                                        ue-CapabilityRAT-Container: 0120000000000000009a500195140052a8a24200
+                                                                            UE-NR-Capability
+                                                                                accessStratumRelease: rel15 (0)
+                                                                                pdcp-Parameters
+                                                                                    supportedROHC-Profiles
+                                                                                        .... ..0. profile0x0000: False
+                                                                                        .... ...0 profile0x0001: False
+                                                                                        0... .... profile0x0002: False
+                                                                                        .0.. .... profile0x0003: False
+                                                                                        ..0. .... profile0x0004: False
+                                                                                        ...0 .... profile0x0006: False
+                                                                                        .... 0... profile0x0101: False
+                                                                                        .... .0.. profile0x0102: False
+                                                                                        .... ..0. profile0x0103: False
+                                                                                        .... ...0 profile0x0104: False
+                                                                                    maxNumberROHC-ContextSessions: cs2 (0)
+                                                                                phy-Parameters
+                                                                                rf-Parameters
+                                                                                    supportedBandListNR: 1 item
+                                                                                        Item 0
+                                                                                            BandNR
+                                                                                                bandNR: 78
+                                                                                featureSets
+                                                                                    featureSetsDownlinkPerCC: 1 item
+                                                                                        Item 0
+                                                                                            FeatureSetDownlinkPerCC
+                                                                                                supportedSubcarrierSpacingDL: kHz30 (1)
+                                                                                                supportedBandwidthDL: fr1 (0)
+                                                                                                    fr1: mhz100 (10)
+                                                                                                maxNumberMIMO-LayersPDSCH: twoLayers (0)
+                                                                                                supportedModulationOrderDL: qam256 (5)
+                                                                                    featureSetsUplinkPerCC: 1 item
+                                                                                        Item 0
+                                                                                            FeatureSetUplinkPerCC
+                                                                                                supportedSubcarrierSpacingUL: kHz30 (1)
+                                                                                                supportedBandwidthUL: fr1 (0)
+                                                                                                    fr1: mhz100 (10)
+                                                                                                mimo-CB-PUSCH
+                                                                                                    maxNumberMIMO-LayersCB-PUSCH: oneLayer (0)
+                                                                                                    maxNumberSRS-ResourcePerSet: 1
+                                                                                                supportedModulationOrderUL: qam256 (5)
+                                                                                nonCriticalExtension
+                                                                                    interRAT-Parameters
+                                                                                    nonCriticalExtension
+                                                                                        ims-Parameters
+

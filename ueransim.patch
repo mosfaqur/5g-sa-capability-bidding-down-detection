@@ -1,0 +1,653 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 08ec1fd..43c8c86 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,6 +4,13 @@ project(ueransim)
+ set(CMAKE_CXX_STANDARD 17)
+ set(CMAKE_C_STANDARD 11)
+ 
++# This codebase (2022-era) relies on transitive standard-library includes
++# (<cstdint>, <cstring>, etc.) that older GCC/libstdc++ pulled in implicitly
++# via other headers. Newer GCC (15.x here) is stricter and rejects these as
++# missing declarations. Force-including the common offenders everywhere is
++# far less invasive than patching every source file individually.
++set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include cstdint -include cstring -include cstdio -include string")
++
+ include_directories(src)
+ 
+ #################### SUB DIRECTORIES ####################
+diff --git a/config/gnb.yaml b/config/gnb.yaml
+new file mode 100644
+index 0000000..40657c8
+--- /dev/null
++++ b/config/gnb.yaml
+@@ -0,0 +1,24 @@
++mcc: '001'          # matches the private testbed PLMN (the project's internal build log)
++mnc: '01'
++
++nci: '0x000000010'  # NR Cell Identity (36-bit)
++idLength: 32        # NR gNB ID length in bits [22...32]
++tac: 1              # Tracking Area Code
++
++linkIp: 127.0.0.1   # gNB's local IP address for Radio Link Simulation (Usually same with local IP)
++ngapIp: 127.0.0.1   # gNB's local IP address for N2 Interface (Usually same with local IP)
++gtpIp: 127.0.0.1    # gNB's local IP address for N3 Interface (Usually same with local IP)
++
++# List of AMF address information - points at ngap_proxy.py (127.0.0.5:38412),
++# same standard N2 port the real srsRAN gNB also targets. The proxy forwards to
++# the real AMF on 127.0.0.5:38413.
++amfConfigs:
++  - address: 127.0.0.5
++    port: 38412
++
++# List of supported S-NSSAIs by this gNB
++slices:
++  - sst: 1
++
++# Indicates whether or not SCTP stream number errors should be ignored.
++ignoreStreamIds: true
+diff --git a/config/ue-sw-ext.yaml b/config/ue-sw-ext.yaml
+new file mode 100644
+index 0000000..2c98672
+--- /dev/null
++++ b/config/ue-sw-ext.yaml
+@@ -0,0 +1,51 @@
++supi: 'imsi-001010000000007'
++mcc: '001'
++mnc: '01'
++key: '00112233445566778899AABBCCDDEEFF'
++op: '63BFA50EE6523365FF14C1F45F88737D'
++opType: 'OPC'
++amf: '8000'
++imei: '356938035643807'
++imeiSv: '4370816125816151'
++
++gnbSearchList:
++  - 127.0.0.1
++
++uacAic:
++  mps: false
++  mcs: false
++
++uacAcc:
++  normalClass: 0
++  class11: false
++  class12: false
++  class13: false
++  class14: false
++  class15: false
++
++sessions:
++  - type: 'IPv4'
++    apn: 'internet'
++    slice:
++      sst: 1
++
++configured-nssai:
++  - sst: 1
++
++default-nssai:
++  - sst: 1
++    sd: 1
++
++integrity:
++  IA1: true
++  IA2: true
++  IA3: true
++
++ciphering:
++  EA1: true
++  EA2: true
++  EA3: true
++
++integrityMaxRate:
++  uplink: 'full'
++  downlink: 'full'
+diff --git a/config/ue-sw-min.yaml b/config/ue-sw-min.yaml
+new file mode 100644
+index 0000000..9deb76c
+--- /dev/null
++++ b/config/ue-sw-min.yaml
+@@ -0,0 +1,51 @@
++supi: 'imsi-001010000000008'
++mcc: '001'
++mnc: '01'
++key: '00112233445566778899AABBCCDDEEFF'
++op: '63BFA50EE6523365FF14C1F45F88737D'
++opType: 'OPC'
++amf: '8000'
++imei: '356938035643808'
++imeiSv: '4370816125816151'
++
++gnbSearchList:
++  - 127.0.0.1
++
++uacAic:
++  mps: false
++  mcs: false
++
++uacAcc:
++  normalClass: 0
++  class11: false
++  class12: false
++  class13: false
++  class14: false
++  class15: false
++
++sessions:
++  - type: 'IPv4'
++    apn: 'internet'
++    slice:
++      sst: 1
++
++configured-nssai:
++  - sst: 1
++
++default-nssai:
++  - sst: 1
++    sd: 1
++
++integrity:
++  IA1: true
++  IA2: true
++  IA3: true
++
++ciphering:
++  EA1: true
++  EA2: true
++  EA3: true
++
++integrityMaxRate:
++  uplink: 'full'
++  downlink: 'full'
+diff --git a/config/ue-sw-std.yaml b/config/ue-sw-std.yaml
+new file mode 100644
+index 0000000..d9c608f
+--- /dev/null
++++ b/config/ue-sw-std.yaml
+@@ -0,0 +1,51 @@
++supi: 'imsi-001010000000006'
++mcc: '001'
++mnc: '01'
++key: '00112233445566778899AABBCCDDEEFF'
++op: '63BFA50EE6523365FF14C1F45F88737D'
++opType: 'OPC'
++amf: '8000'
++imei: '356938035643806'
++imeiSv: '4370816125816151'
++
++gnbSearchList:
++  - 127.0.0.1
++
++uacAic:
++  mps: false
++  mcs: false
++
++uacAcc:
++  normalClass: 0
++  class11: false
++  class12: false
++  class13: false
++  class14: false
++  class15: false
++
++sessions:
++  - type: 'IPv4'
++    apn: 'internet'
++    slice:
++      sst: 1
++
++configured-nssai:
++  - sst: 1
++
++default-nssai:
++  - sst: 1
++    sd: 1
++
++integrity:
++  IA1: true
++  IA2: true
++  IA3: true
++
++ciphering:
++  EA1: true
++  EA2: true
++  EA3: true
++
++integrityMaxRate:
++  uplink: 'full'
++  downlink: 'full'
+diff --git a/src/ext/yaml-cpp/emitterutils.cpp b/src/ext/yaml-cpp/emitterutils.cpp
+index 0113c45..bccb2a2 100644
+--- a/src/ext/yaml-cpp/emitterutils.cpp
++++ b/src/ext/yaml-cpp/emitterutils.cpp
+@@ -1,4 +1,5 @@
+ #include <algorithm>
++#include <cstdint>
+ #include <iomanip>
+ #include <sstream>
+ 
+diff --git a/src/gnb/ngap/context.cpp b/src/gnb/ngap/context.cpp
+index 5375797..e3600df 100644
+--- a/src/gnb/ngap/context.cpp
++++ b/src/gnb/ngap/context.cpp
+@@ -226,6 +226,13 @@ void NgapTask::receiveInitialContextSetup(int amfId, ASN_NGAP_InitialContextSetu
+ 
+     auto *response = asn::ngap::NewMessagePdu<ASN_NGAP_InitialContextSetupResponse>(responseIes);
+     sendNgapUeAssociated(ue->ctxId, response);
++
++    // the project's testbed architecture notes §6.2: real gNBs request UE radio capability around this
++    // point in registration; UERANSIM never did at all, so the NGAP proxy had nothing
++    // to intercept for the software UE profiles. Trigger it here.
++    auto capReq = std::make_unique<NmGnbNgapToRrc>(NmGnbNgapToRrc::UE_CAPABILITY_ENQUIRY);
++    capReq->ueId = ue->ctxId;
++    m_base->rrcTask->push(std::move(capReq));
+ }
+ 
+ void NgapTask::receiveContextRelease(int amfId, ASN_NGAP_UEContextReleaseCommand *msg)
+diff --git a/src/gnb/ngap/nas.cpp b/src/gnb/ngap/nas.cpp
+index e3bb969..4a804bf 100644
+--- a/src/gnb/ngap/nas.cpp
++++ b/src/gnb/ngap/nas.cpp
+@@ -19,6 +19,7 @@
+ #include <asn/ngap/ASN_NGAP_NGAP-PDU.h>
+ #include <asn/ngap/ASN_NGAP_ProtocolIE-Field.h>
+ #include <asn/ngap/ASN_NGAP_RerouteNASRequest.h>
++#include <asn/ngap/ASN_NGAP_UERadioCapabilityInfoIndication.h>
+ #include <asn/ngap/ASN_NGAP_UplinkNASTransport.h>
+ 
+ namespace nr::gnb
+@@ -119,6 +120,18 @@ void NgapTask::handleUplinkNasTransport(int ueId, const OctetString &nasPdu)
+     sendNgapUeAssociated(ueId, pdu);
+ }
+ 
++void NgapTask::sendUeRadioCapabilityInfoIndication(int ueId, const OctetString &ueRadioCapability)
++{
++    auto *ie = asn::New<ASN_NGAP_UERadioCapabilityInfoIndicationIEs>();
++    ie->id = ASN_NGAP_ProtocolIE_ID_id_UERadioCapability;
++    ie->criticality = ASN_NGAP_Criticality_ignore;
++    ie->value.present = ASN_NGAP_UERadioCapabilityInfoIndicationIEs__value_PR_UERadioCapability;
++    asn::SetOctetString(ie->value.choice.UERadioCapability, ueRadioCapability);
++
++    auto *pdu = asn::ngap::NewMessagePdu<ASN_NGAP_UERadioCapabilityInfoIndication>({ie});
++    sendNgapUeAssociated(ueId, pdu);
++}
++
+ void NgapTask::sendNasNonDeliveryIndication(int ueId, const OctetString &nasPdu, NgapCause cause)
+ {
+     m_logger->debug("Sending non-delivery indication for UE[%d]", ueId);
+diff --git a/src/gnb/ngap/task.cpp b/src/gnb/ngap/task.cpp
+index 2165e90..6723d06 100644
+--- a/src/gnb/ngap/task.cpp
++++ b/src/gnb/ngap/task.cpp
+@@ -66,6 +66,10 @@ void NgapTask::onLoop()
+             handleRadioLinkFailure(w.ueId);
+             break;
+         }
++        case NmGnbRrcToNgap::UE_CAPABILITY_INFO: {
++            sendUeRadioCapabilityInfoIndication(w.ueId, w.pdu);
++            break;
++        }
+         }
+         break;
+     }
+diff --git a/src/gnb/ngap/task.hpp b/src/gnb/ngap/task.hpp
+index 7d365f9..f5a0164 100644
+--- a/src/gnb/ngap/task.hpp
++++ b/src/gnb/ngap/task.hpp
+@@ -106,6 +106,10 @@ class NgapTask : public NtsTask
+     void sendNasNonDeliveryIndication(int ueId, const OctetString &nasPdu, NgapCause cause);
+     void receiveRerouteNasRequest(int amfId, ASN_NGAP_RerouteNASRequest *msg);
+ 
++    /* UE radio capability (the project's testbed architecture notes §6.2 - UERANSIM originally never
++     * sent this at all; added so the Stage 1/2 NGAP proxy has something to rewrite) */
++    void sendUeRadioCapabilityInfoIndication(int ueId, const OctetString &ueRadioCapability);
++
+     /* PDU session management */
+     void receiveSessionResourceSetupRequest(int amfId, ASN_NGAP_PDUSessionResourceSetupRequest *msg);
+     void receiveSessionResourceReleaseCommand(int amfId, ASN_NGAP_PDUSessionResourceReleaseCommand *msg);
+diff --git a/src/gnb/nts.hpp b/src/gnb/nts.hpp
+index 09dd857..4a5cd1e 100644
+--- a/src/gnb/nts.hpp
++++ b/src/gnb/nts.hpp
+@@ -166,10 +166,12 @@ struct NmGnbNgapToRrc : NtsMessage
+         NAS_DELIVERY,
+         AN_RELEASE,
+         PAGING,
++        UE_CAPABILITY_ENQUIRY,
+     } present;
+ 
+     // NAS_DELIVERY
+     // AN_RELEASE
++    // UE_CAPABILITY_ENQUIRY
+     int ueId{};
+ 
+     // NAS_DELIVERY
+@@ -190,16 +192,19 @@ struct NmGnbRrcToNgap : NtsMessage
+     {
+         INITIAL_NAS_DELIVERY,
+         UPLINK_NAS_DELIVERY,
+-        RADIO_LINK_FAILURE
++        RADIO_LINK_FAILURE,
++        UE_CAPABILITY_INFO,
+     } present;
+ 
+     // INITIAL_NAS_DELIVERY
+     // UPLINK_NAS_DELIVERY
+     // RADIO_LINK_FAILURE
++    // UE_CAPABILITY_INFO
+     int ueId{};
+ 
+     // INITIAL_NAS_DELIVERY
+     // UPLINK_NAS_DELIVERY
++    // UE_CAPABILITY_INFO
+     OctetString pdu{};
+ 
+     // INITIAL_NAS_DELIVERY
+diff --git a/src/gnb/rrc/capability.cpp b/src/gnb/rrc/capability.cpp
+new file mode 100644
+index 0000000..c19813d
+--- /dev/null
++++ b/src/gnb/rrc/capability.cpp
+@@ -0,0 +1,112 @@
++//
++// UE radio capability retrieval (the project's testbed architecture notes §6.2, COMP997 addition).
++//
++// UERANSIM v3.2.6's gNB never implemented RRC UECapabilityEnquiry/Information at
++// all - it only referenced UERadioCapabilityInfoIndication in a criticality lookup
++// table for handling unknown incoming NGAP messages, never to send one. This means
++// the Python NGAP proxy built for the bidding-down attack study (which intercepts
++// and rewrites UERadioCapabilityInfoIndication) had nothing to intercept for the
++// three UERANSIM software profiles. This file adds the missing procedure: request
++// UE capability right after Initial Context Setup (context.cpp), relay the UE's
++// answer up to the AMF over NGAP (ngap/nas.cpp::sendUeRadioCapabilityInfoIndication).
++//
++
++#include "task.hpp"
++
++#include <gnb/ngap/task.hpp>
++#include <lib/rrc/encode.hpp>
++
++#include <asn/rrc/ASN_RRC_DL-DCCH-Message.h>
++#include <asn/rrc/ASN_RRC_RAT-Type.h>
++#include <asn/rrc/ASN_RRC_UE-CapabilityRAT-ContainerList.h>
++#include <asn/rrc/ASN_RRC_UE-CapabilityRAT-Request.h>
++#include <asn/rrc/ASN_RRC_UE-CapabilityRAT-RequestList.h>
++#include <asn/rrc/ASN_RRC_UE-CapabilityRAT-RequestList.h>
++#include <asn/rrc/ASN_RRC_UECapabilityEnquiry-IEs.h>
++#include <asn/rrc/ASN_RRC_UECapabilityEnquiry.h>
++#include <asn/rrc/ASN_RRC_UECapabilityInformation-IEs.h>
++#include <asn/rrc/ASN_RRC_UECapabilityInformation.h>
++#include <asn/rrc/ASN_RRC_UERadioAccessCapabilityInformation-IEs.h>
++#include <asn/rrc/ASN_RRC_UERadioAccessCapabilityInformation.h>
++
++namespace nr::gnb
++{
++
++void GnbRrcTask::sendUeCapabilityEnquiry(int ueId)
++{
++    auto *pdu = asn::New<ASN_RRC_DL_DCCH_Message>();
++    pdu->message.present = ASN_RRC_DL_DCCH_MessageType_PR_c1;
++    pdu->message.choice.c1 =
++        asn::New<ASN_RRC_DL_DCCH_MessageType_t::ASN_RRC_DL_DCCH_MessageType_u::ASN_RRC_DL_DCCH_MessageType__c1>();
++    pdu->message.choice.c1->present = ASN_RRC_DL_DCCH_MessageType__c1_PR_ueCapabilityEnquiry;
++    pdu->message.choice.c1->choice.ueCapabilityEnquiry = asn::New<ASN_RRC_UECapabilityEnquiry>();
++
++    auto *enquiry = pdu->message.choice.c1->choice.ueCapabilityEnquiry;
++    enquiry->rrc_TransactionIdentifier = getNextTid();
++    enquiry->criticalExtensions.present = ASN_RRC_UECapabilityEnquiry__criticalExtensions_PR_ueCapabilityEnquiry;
++    enquiry->criticalExtensions.choice.ueCapabilityEnquiry = asn::New<ASN_RRC_UECapabilityEnquiry_IEs>();
++
++    auto *request = asn::New<ASN_RRC_UE_CapabilityRAT_Request>();
++    request->rat_Type = ASN_RRC_RAT_Type_nr;
++    asn::SequenceAdd(enquiry->criticalExtensions.choice.ueCapabilityEnquiry->ue_CapabilityRAT_RequestList, request);
++
++    m_logger->debug("Sending UE Capability Enquiry to UE[%d]", ueId);
++    sendRrcMessage(ueId, pdu);
++    asn::Free(asn_DEF_ASN_RRC_DL_DCCH_Message, pdu);
++}
++
++void GnbRrcTask::receiveUeCapabilityInformation(int ueId, const ASN_RRC_UECapabilityInformation &msg)
++{
++    if (msg.criticalExtensions.present != ASN_RRC_UECapabilityInformation__criticalExtensions_PR_ueCapabilityInformation)
++        return;
++
++    auto *ies = msg.criticalExtensions.choice.ueCapabilityInformation;
++    if (ies == nullptr || ies->ue_CapabilityRAT_ContainerList == nullptr)
++        return;
++
++    // Re-encode just the capability container list (UPER, its own type descriptor) -
++    // this is the inner content that the outer UERadioAccessCapabilityInformation
++    // wraps, per the live capture ground truth in the project's testbed architecture notes §6.2.
++    OctetString containerListBytes =
++        rrc::encode::EncodeS(asn_DEF_ASN_RRC_UE_CapabilityRAT_ContainerList, ies->ue_CapabilityRAT_ContainerList);
++    if (containerListBytes.length() == 0)
++    {
++        m_logger->err("Failed to encode UE-CapabilityRAT-ContainerList for UE[%d]", ueId);
++        return;
++    }
++
++    // Wrap in UERadioAccessCapabilityInformation - the actual NGAP UERadioCapability
++    // IE content (confirmed against a real handset capture, not assumed from the
++    // spec text: the NGAP IE is not a bare UE-CapabilityRAT-ContainerList).
++    auto *outer = asn::New<ASN_RRC_UERadioAccessCapabilityInformation>();
++    outer->criticalExtensions.present = ASN_RRC_UERadioAccessCapabilityInformation__criticalExtensions_PR_c1;
++    outer->criticalExtensions.choice.c1 = asn::New<
++        ASN_RRC_UERadioAccessCapabilityInformation_t::ASN_RRC_UERadioAccessCapabilityInformation__criticalExtensions::
++            ASN_RRC_UERadioAccessCapabilityInformation__ASN_RRC_criticalExtensions_u::
++                ASN_RRC_UERadioAccessCapabilityInformation__criticalExtensions__c1>();
++    outer->criticalExtensions.choice.c1->present =
++        ASN_RRC_UERadioAccessCapabilityInformation__criticalExtensions__c1_PR_ueRadioAccessCapabilityInformation;
++    outer->criticalExtensions.choice.c1->choice.ueRadioAccessCapabilityInformation =
++        asn::New<ASN_RRC_UERadioAccessCapabilityInformation_IEs>();
++    asn::SetOctetString(
++        outer->criticalExtensions.choice.c1->choice.ueRadioAccessCapabilityInformation->ue_RadioAccessCapabilityInfo,
++        containerListBytes);
++
++    OctetString outerBytes = rrc::encode::EncodeS(asn_DEF_ASN_RRC_UERadioAccessCapabilityInformation, outer);
++    asn::Free(asn_DEF_ASN_RRC_UERadioAccessCapabilityInformation, outer);
++
++    if (outerBytes.length() == 0)
++    {
++        m_logger->err("Failed to encode UERadioAccessCapabilityInformation for UE[%d]", ueId);
++        return;
++    }
++
++    m_logger->debug("UE Capability Information received from UE[%d], forwarding to NGAP", ueId);
++
++    auto w = std::make_unique<NmGnbRrcToNgap>(NmGnbRrcToNgap::UE_CAPABILITY_INFO);
++    w->ueId = ueId;
++    w->pdu = std::move(outerBytes);
++    m_base->ngapTask->push(std::move(w));
++}
++
++} // namespace nr::gnb
+diff --git a/src/gnb/rrc/channel.cpp b/src/gnb/rrc/channel.cpp
+index 00ffa86..f6f6919 100644
+--- a/src/gnb/rrc/channel.cpp
++++ b/src/gnb/rrc/channel.cpp
+@@ -208,7 +208,8 @@ void GnbRrcTask::receiveRrcMessage(int ueId, ASN_RRC_UL_DCCH_Message *msg)
+     case ASN_RRC_UL_DCCH_MessageType__c1_PR_locationMeasurementIndication:
+         break; // TODO
+     case ASN_RRC_UL_DCCH_MessageType__c1_PR_ueCapabilityInformation:
+-        break; // TODO
++        receiveUeCapabilityInformation(ueId, *c1->choice.ueCapabilityInformation);
++        break;
+     case ASN_RRC_UL_DCCH_MessageType__c1_PR_counterCheckResponse:
+         break; // TODO
+     case ASN_RRC_UL_DCCH_MessageType__c1_PR_ueAssistanceInformation:
+diff --git a/src/gnb/rrc/task.cpp b/src/gnb/rrc/task.cpp
+index 468e656..2e99526 100644
+--- a/src/gnb/rrc/task.cpp
++++ b/src/gnb/rrc/task.cpp
+@@ -69,6 +69,10 @@ void GnbRrcTask::onLoop()
+         case NmGnbNgapToRrc::PAGING:
+             handlePaging(w.uePagingTmsi, w.taiListForPaging);
+             break;
++        case NmGnbNgapToRrc::UE_CAPABILITY_ENQUIRY: {
++            sendUeCapabilityEnquiry(w.ueId);
++            break;
++        }
+         }
+         break;
+     }
+diff --git a/src/gnb/rrc/task.hpp b/src/gnb/rrc/task.hpp
+index b1259e7..665b6f4 100644
+--- a/src/gnb/rrc/task.hpp
++++ b/src/gnb/rrc/task.hpp
+@@ -31,6 +31,7 @@ extern "C"
+     struct ASN_RRC_RRCSetupRequest;
+     struct ASN_RRC_RRCSetupComplete;
+     struct ASN_RRC_ULInformationTransfer;
++    struct ASN_RRC_UECapabilityInformation;
+ }
+ 
+ namespace nr::gnb
+@@ -79,6 +80,10 @@ class GnbRrcTask : public NtsTask
+ 
+     void receiveUplinkInformationTransfer(int ueId, const ASN_RRC_ULInformationTransfer &msg);
+ 
++    /* UE radio capability (the project's testbed architecture notes §6.2) */
++    void sendUeCapabilityEnquiry(int ueId);
++    void receiveUeCapabilityInformation(int ueId, const ASN_RRC_UECapabilityInformation &msg);
++
+     /* RRC channel send message */
+     void sendRrcMessage(ASN_RRC_BCCH_BCH_Message *msg);
+     void sendRrcMessage(ASN_RRC_BCCH_DL_SCH_Message *msg);
+diff --git a/src/ue/rrc/capability.cpp b/src/ue/rrc/capability.cpp
+new file mode 100644
+index 0000000..bdad3d8
+--- /dev/null
++++ b/src/ue/rrc/capability.cpp
+@@ -0,0 +1,95 @@
++//
++// UE radio capability reporting (the project's testbed architecture notes §6.2, COMP997 addition).
++//
++// UERANSIM never implemented RRC UECapabilityEnquiry/Information (see
++// gnb/rrc/capability.cpp for the fuller explanation). This builds a minimal but
++// spec-valid UE-NR-Capability and reports it when the gNB asks. The capability
++// content itself is intentionally the same fixed/minimal container for every UE
++// profile - per the architecture doc, per-profile fingerprint differentiation
++// (SW-Std/SW-Ext/SW-Min) is the NGAP proxy's Stage 1 rewrite job, not the UE's.
++//
++
++#include "task.hpp"
++
++#include <lib/rrc/encode.hpp>
++
++#include <asn/rrc/ASN_RRC_BandNR.h>
++#include <asn/rrc/ASN_RRC_PDCP-Parameters.h>
++#include <asn/rrc/ASN_RRC_Phy-Parameters.h>
++#include <asn/rrc/ASN_RRC_RAT-Type.h>
++#include <asn/rrc/ASN_RRC_RF-Parameters.h>
++#include <asn/rrc/ASN_RRC_UE-CapabilityRAT-Container.h>
++#include <asn/rrc/ASN_RRC_UE-CapabilityRAT-ContainerList.h>
++#include <asn/rrc/ASN_RRC_UE-NR-Capability.h>
++#include <asn/rrc/ASN_RRC_UECapabilityEnquiry.h>
++#include <asn/rrc/ASN_RRC_UECapabilityInformation-IEs.h>
++#include <asn/rrc/ASN_RRC_UECapabilityInformation.h>
++#include <asn/rrc/ASN_RRC_UL-DCCH-Message.h>
++
++namespace nr::ue
++{
++
++// Minimal spec-valid UE-NR-Capability: only the four mandatory top-level fields
++// (accessStratumRelease, pdcp/phy/rf-Parameters) are populated; everything else
++// is legally OPTIONAL and left absent. A single band (n78, the testbed's own
++// band) is reported - the Stage 1 proxy rewrite overwrites this per profile.
++static ASN_RRC_UE_NR_Capability *buildMinimalUeNrCapability()
++{
++    auto *cap = asn::New<ASN_RRC_UE_NR_Capability>();
++    cap->accessStratumRelease = ASN_RRC_AccessStratumRelease_rel15;
++
++    // pdcp-Parameters: all ROHC profile bits false, smallest valid context-session enum
++    cap->pdcp_Parameters.maxNumberROHC_ContextSessions =
++        ASN_RRC_PDCP_Parameters__maxNumberROHC_ContextSessions_cs2;
++
++    // phy-Parameters: every substructure is OPTIONAL, leave fully absent
++    cap->phy_Parameters = {};
++
++    // rf-Parameters: one supported band (n78), no CA band combination list
++    auto *band = asn::New<ASN_RRC_BandNR>();
++    band->bandNR = 78;
++    asn::SequenceAdd(cap->rf_Parameters.supportedBandListNR, band);
++
++    return cap;
++}
++
++void UeRrcTask::receiveUeCapabilityEnquiry(const ASN_RRC_UECapabilityEnquiry &msg)
++{
++    m_logger->debug("UE Capability Enquiry received");
++
++    auto *nrCap = buildMinimalUeNrCapability();
++    OctetString nrCapBytes = rrc::encode::EncodeS(asn_DEF_ASN_RRC_UE_NR_Capability, nrCap);
++    asn::Free(asn_DEF_ASN_RRC_UE_NR_Capability, nrCap);
++
++    if (nrCapBytes.length() == 0)
++    {
++        m_logger->err("Failed to encode UE-NR-Capability");
++        return;
++    }
++
++    auto *container = asn::New<ASN_RRC_UE_CapabilityRAT_Container>();
++    container->rat_Type = ASN_RRC_RAT_Type_nr;
++    asn::SetOctetString(container->ue_CapabilityRAT_Container, nrCapBytes);
++
++    auto *pdu = asn::New<ASN_RRC_UL_DCCH_Message>();
++    pdu->message.present = ASN_RRC_UL_DCCH_MessageType_PR_c1;
++    pdu->message.choice.c1 =
++        asn::New<ASN_RRC_UL_DCCH_MessageType_t::ASN_RRC_UL_DCCH_MessageType_u::ASN_RRC_UL_DCCH_MessageType__c1>();
++    pdu->message.choice.c1->present = ASN_RRC_UL_DCCH_MessageType__c1_PR_ueCapabilityInformation;
++    pdu->message.choice.c1->choice.ueCapabilityInformation = asn::New<ASN_RRC_UECapabilityInformation>();
++
++    auto *info = pdu->message.choice.c1->choice.ueCapabilityInformation;
++    info->rrc_TransactionIdentifier = msg.rrc_TransactionIdentifier;
++    info->criticalExtensions.present = ASN_RRC_UECapabilityInformation__criticalExtensions_PR_ueCapabilityInformation;
++    info->criticalExtensions.choice.ueCapabilityInformation = asn::New<ASN_RRC_UECapabilityInformation_IEs>();
++    info->criticalExtensions.choice.ueCapabilityInformation->ue_CapabilityRAT_ContainerList =
++        asn::New<ASN_RRC_UE_CapabilityRAT_ContainerList>();
++    asn::SequenceAdd(*info->criticalExtensions.choice.ueCapabilityInformation->ue_CapabilityRAT_ContainerList,
++                      container);
++
++    m_logger->debug("Sending UE Capability Information");
++    sendRrcMessage(pdu);
++    asn::Free(asn_DEF_ASN_RRC_UL_DCCH_Message, pdu);
++}
++
++} // namespace nr::ue
+diff --git a/src/ue/rrc/channel.cpp b/src/ue/rrc/channel.cpp
+index 5ee2847..0811ea9 100644
+--- a/src/ue/rrc/channel.cpp
++++ b/src/ue/rrc/channel.cpp
+@@ -187,6 +187,9 @@ void UeRrcTask::receiveRrcMessage(ASN_RRC_DL_DCCH_Message *msg)
+     case ASN_RRC_DL_DCCH_MessageType__c1_PR_rrcRelease:
+         receiveRrcRelease(*c1->choice.rrcRelease);
+         break;
++    case ASN_RRC_DL_DCCH_MessageType__c1_PR_ueCapabilityEnquiry:
++        receiveUeCapabilityEnquiry(*c1->choice.ueCapabilityEnquiry);
++        break;
+     default:
+         break;
+     }
+diff --git a/src/ue/rrc/task.hpp b/src/ue/rrc/task.hpp
+index 3807107..dbcdcf0 100644
+--- a/src/ue/rrc/task.hpp
++++ b/src/ue/rrc/task.hpp
+@@ -40,6 +40,7 @@ extern "C"
+     struct ASN_RRC_Paging;
+     struct ASN_RRC_MIB;
+     struct ASN_RRC_SIB1;
++    struct ASN_RRC_UECapabilityEnquiry;
+ }
+ 
+ namespace nr::ue
+@@ -124,6 +125,9 @@ class UeRrcTask : public NtsTask
+     void deliverUplinkNas(uint32_t pduId, OctetString &&nasPdu);
+     void receiveDownlinkInformationTransfer(const ASN_RRC_DLInformationTransfer &msg);
+ 
++    /* UE radio capability (the project's testbed architecture notes §6.2) */
++    void receiveUeCapabilityEnquiry(const ASN_RRC_UECapabilityEnquiry &msg);
++
+     /* Connection Control */
+     void startConnectionEstablishment(OctetString &&nasPdu);
+     void handleEstablishmentFailure();

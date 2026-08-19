@@ -1,0 +1,122 @@
+{
+  "n_samples": 4225,
+  "labels": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "label_names": {
+    "0": "Normal",
+    "1": "Cat-downgrade",
+    "2": "CA-disabled",
+    "3": "MIMO-reduced",
+    "4": "VoNR-denied",
+    "5": "Combined",
+    "6": "Partial/noise"
+  },
+  "cv": "StratifiedKFold(n_splits=5, shuffle=True, random_state=42)",
+  "results": {
+    "baseline_all_12": {
+      "n_features": 12,
+      "dropped": [],
+      "target_label": null,
+      "target_label_name": null,
+      "macro_f1": 0.8474491001127342,
+      "per_class_recall": {
+        "0": 0.7135761589403974,
+        "1": 1.0,
+        "2": 0.8774834437086093,
+        "3": 0.8658940397350994,
+        "4": 0.8526490066225165,
+        "5": 0.8718801996672213,
+        "6": 0.7512437810945274
+      }
+    },
+    "drop_MIMO": {
+      "n_features": 10,
+      "dropped": [
+        "mimo_layers_dl",
+        "mimo_layers_ul"
+      ],
+      "target_label": 3,
+      "target_label_name": "MIMO-reduced",
+      "macro_f1": 0.7846394882794604,
+      "per_class_recall": {
+        "0": 0.6506622516556292,
+        "1": 1.0,
+        "2": 0.8658940397350994,
+        "3": 0.5894039735099338,
+        "4": 0.8410596026490066,
+        "5": 0.8602329450915142,
+        "6": 0.6865671641791045
+      },
+      "target_label_recall_baseline": 0.8658940397350994,
+      "target_label_recall_degradation": 0.2764900662251656
+    },
+    "drop_CA": {
+      "n_features": 10,
+      "dropped": [
+        "ca_supported",
+        "ca_band_count"
+      ],
+      "target_label": 2,
+      "target_label_name": "CA-disabled",
+      "macro_f1": 0.8474491001127342,
+      "per_class_recall": {
+        "0": 0.7135761589403974,
+        "1": 1.0,
+        "2": 0.8774834437086093,
+        "3": 0.8658940397350994,
+        "4": 0.8526490066225165,
+        "5": 0.8718801996672213,
+        "6": 0.7512437810945274
+      },
+      "target_label_recall_baseline": 0.8774834437086093,
+      "target_label_recall_degradation": 0.0
+    },
+    "drop_ue_category": {
+      "n_features": 11,
+      "dropped": [
+        "ue_category"
+      ],
+      "target_label": 1,
+      "target_label_name": "Cat-downgrade",
+      "macro_f1": 0.7384007328913889,
+      "per_class_recall": {
+        "0": 0.5016556291390728,
+        "1": 0.5190082644628099,
+        "2": 0.8658940397350994,
+        "3": 0.8576158940397351,
+        "4": 0.8443708609271523,
+        "5": 0.8668885191347754,
+        "6": 0.7164179104477612
+      },
+      "target_label_recall_baseline": 1.0,
+      "target_label_recall_degradation": 0.4809917355371901
+    },
+    "drop_VoNR": {
+      "n_features": 11,
+      "dropped": [
+        "vonr_supported"
+      ],
+      "target_label": 4,
+      "target_label_name": "VoNR-denied",
+      "macro_f1": 0.8030652590191674,
+      "per_class_recall": {
+        "0": 0.6639072847682119,
+        "1": 1.0,
+        "2": 0.8774834437086093,
+        "3": 0.8658940397350994,
+        "4": 0.6506622516556292,
+        "5": 0.8718801996672213,
+        "6": 0.6915422885572139
+      },
+      "target_label_recall_baseline": 0.8526490066225165,
+      "target_label_recall_degradation": 0.20198675496688734
+    }
+  }
+}

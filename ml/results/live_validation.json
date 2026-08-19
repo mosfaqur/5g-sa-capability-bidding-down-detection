@@ -1,0 +1,111 @@
+{
+  "session_id": "live-validation-20260811",
+  "description": "Pure-inference live validation of ml/models/rf_single_event.pkl (Session D, trained 2026-08-10) against freshly captured, independent registration events. No retraining/refitting performed at any point.",
+  "capture": {
+    "devices": {
+      "nothing3a": "Nothing Phone 3a, adb serial 0015935A6002659, imsi-001010000000003",
+      "realme": "Realme RMX3363, adb serial f74439fa, imsi-001010000000004"
+    },
+    "labels_captured": [
+      0,
+      1,
+      3,
+      5
+    ],
+    "events_per_profile_per_label": 15,
+    "total_events": 120,
+    "pcap_dir": "data/raw_validation_live/<label>/",
+    "features_csv": "features/raw_12f_live_validation.csv",
+    "registration_success_rate": "120/120 (100%), 0 decode failures, 0 rows dropped"
+  },
+  "overall_accuracy": 0.9916666666666667,
+  "per_label": {
+    "0": {
+      "label_name": "Normal",
+      "n": 30,
+      "accuracy": 0.9666666666666667,
+      "false_negatives": 1,
+      "false_negative_rate": 0.03333333333333333
+    },
+    "1": {
+      "label_name": "Cat-downgrade",
+      "n": 30,
+      "accuracy": 1.0,
+      "false_negatives": 0,
+      "false_negative_rate": 0.0
+    },
+    "3": {
+      "label_name": "MIMO-reduced",
+      "n": 30,
+      "accuracy": 1.0,
+      "false_negatives": 0,
+      "false_negative_rate": 0.0
+    },
+    "5": {
+      "label_name": "Combined",
+      "n": 30,
+      "accuracy": 1.0,
+      "false_negatives": 0,
+      "false_negative_rate": 0.0
+    }
+  },
+  "confusion_matrix": {
+    "labels": [
+      0,
+      1,
+      3,
+      5
+    ],
+    "matrix": [
+      [
+        29,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        30,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        30,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        30
+      ]
+    ]
+  },
+  "comparison_to_session_d_baseline": {
+    "session_d_full_7class_macro_f1": 0.8474491001127342,
+    "session_d_full_7class_accuracy": 0.8475739644970414,
+    "session_d_recall_for_tested_labels_only": {
+      "0": 0.7135761589403974,
+      "1": 1.0,
+      "3": 0.8658940397350994,
+      "5": 0.8718801996672213
+    },
+    "session_d_f1_for_tested_labels_only": {
+      "0": 0.7219430485762144,
+      "1": 1.0,
+      "3": 0.8594905505341003,
+      "5": 0.880672268907563
+    },
+    "live_overall_accuracy": 0.9916666666666667,
+    "verdict": "holds up / improves, not a regression",
+    "explanation": "Live accuracy (99.2%) is well above the Session D full 7-class macro-F1 (0.847), but this is not an apples-to-apples comparison: this validation run only exercised 4 of the 7 trained labels (0,1,3,5), deliberately excluding labels 2/4/6 which are the main sources of confusion for label 0 in the full 7-class CV confusion matrix (label 0 is confused with label 6 in 99/604 CV rows, and with 2/3/4 in 22/23/21 rows respectively; label 1/3/5's CV F1 in isolation were already 1.0/0.859/0.881). Restricting Session D's own CV confusion matrix to predictions among {0,1,3,5} gives 2083/2167 = 96.1% accuracy, much closer to (and still below) the 99.2% observed live. Both live-validation devices (Nothing 3A, Realme) are members of the original 6-profile training set (not held out), so this run tests in-distribution generalisation, not cross-profile transfer; per the project's internal build log's W6.3 LOPO finding, these two profiles specifically generalise well (macro-F1 0.82/0.81) even when fully held out, consistent with strong live performance here. The single miss (1 Realme label-0 row predicted as label 6) is exactly the model's known largest label-0 confusion direction from the Session D CV confusion matrix, not a new failure mode."
+  },
+  "investigation": {
+    "label_imbalance_checked": "Ruled out \u2014 perfectly balanced, 30 events per label (15 per device), 120 total.",
+    "decode_anomalies_checked": "Ruled out \u2014 all 120/120 PCAPs decoded cleanly by extract_features.extract() with no TSharkCrashException/truncation fallback triggered (Bug 13/17 class of anomaly), 0 nulls in features/raw_12f_live_validation.csv, and every profile/label combination produced byte-identical feature values across all 15 repeat events (zero within-class variance), matching the deterministic behaviour already documented for these attack labels in the 2026-08-10 Session C2 characterisation.",
+    "distribution_shift_checked": "Ruled out \u2014 live-captured label-0 feature vectors for both devices were compared directly against features/raw_12f.csv's original training rows for the same profiles: nothing3a (ue_category=16, ca_band_count=1, mimo_dl=4, mimo_ul=1, vonr=True, nr_band_count=10) and realme (ue_category=15, nr_band_count=13, total_capability_size_bytes=813, ie_field_count=11) match the original training data's values exactly, field-for-field. No RF/firmware/carrier-config drift detected between the original Session A/B capture (2026-08-08/09) and this live-validation run (2026-08-11)."
+  },
+  "operational_note": "False negative rate is 0% for all three attack labels tested (1 Cat-downgrade, 3 MIMO-reduced, 5 Combined) \u2014 no attack was missed. The single error was a label-0 (Normal) row misclassified as label 6 (Partial/noise), i.e. a false alarm on benign traffic, not a missed attack \u2014 the operationally critical failure mode for this study."
+}

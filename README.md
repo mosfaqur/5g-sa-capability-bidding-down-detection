@@ -1,5 +1,5 @@
 # 5G SA UE Capability Bidding-Down Attack Detection
-
+![Project Screenshot](analysis/exhibits/screenshots/SDR-Setup.jpg)
 Whilst fifth-generation (5G) networks introduce considerable security hardening over their
 predecessors, the capability negotiation that takes place between a User Equipment (UE) and the
 network remains an area where a well-placed adversary can quietly understate what a device is

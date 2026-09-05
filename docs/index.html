@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Building the Open5GS 2.7.7 core and srsRAN Project 25.10 gNodeB on Kali Linux, including the Kali-specific fixups neither upstream project documents.">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Open5GS + srsRAN on Kali</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@700;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --ground:#F0F0F0;
+  --surface:#FFFFFF;
+  --sunk:#E6E6E6;
+  --ink:#0A0A0A;
+  --muted:#5E5E5E;
+  --rule:#D0D0D0;
+  --rule-firm:#9A9A9A;
+  --signal:#1A1A1A;
+  --signal-soft:#E9E9E9;
+  --warn:#0A0A0A;
+  --warn-soft:#E0E0E0;
+  --fail:#000000;
+  --fail-soft:#D6D6D6;
+  --ok:#0A0A0A;
+  --code-ink:#141414;
+  --code-ground:#F5F5F5;
+
+  --f-display:"Chivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+
+  --maxw:1180px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0B0B0B;
+    --surface:#151515;
+    --sunk:#1D1D1D;
+    --ink:#EDEDED;
+    --muted:#9B9B9B;
+    --rule:#2E2E2E;
+    --rule-firm:#5A5A5A;
+    --signal:#EDEDED;
+    --signal-soft:#1F1F1F;
+    --warn:#FFFFFF;
+    --warn-soft:#262626;
+    --fail:#FFFFFF;
+    --fail-soft:#2F2F2F;
+    --ok:#EDEDED;
+    --code-ink:#DCDCDC;
+    --code-ground:#101010;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0B0B0B;
+  --surface:#151515;
+  --sunk:#1D1D1D;
+  --ink:#EDEDED;
+  --muted:#9B9B9B;
+  --rule:#2E2E2E;
+  --rule-firm:#5A5A5A;
+  --signal:#EDEDED;
+  --signal-soft:#1F1F1F;
+  --warn:#FFFFFF;
+  --warn-soft:#262626;
+  --fail:#FFFFFF;
+  --fail-soft:#2F2F2F;
+  --ok:#EDEDED;
+  --code-ink:#DCDCDC;
+  --code-ground:#101010;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:16px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+
+/* ---------- masthead ---------- */
+.masthead{border-bottom:1px solid var(--rule);background:var(--surface)}
+.masthead .wrap{padding-top:44px;padding-bottom:34px}
+.eyebrow{
+  font-family:var(--f-mono);font-size:11.5px;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--signal);
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+}
+.eyebrow .sep{color:var(--rule)}
+h1{
+  font-family:var(--f-display);font-weight:900;
+  font-size:clamp(2.1rem,5.2vw,3.4rem);line-height:1.02;
+  letter-spacing:-.022em;margin:14px 0 0;text-wrap:balance;
+}
+h1 .plus{color:var(--muted);font-weight:700}
+.standfirst{
+  margin:16px 0 0;max-width:64ch;font-size:1.06rem;color:var(--muted);
+}
+.standfirst strong{color:var(--ink);font-weight:600}
+
+/* ---------- readout ---------- */
+.readout{
+  margin-top:30px;border:1px solid var(--rule);border-radius:3px;
+  background:var(--sunk);
+}
+.readout-head{
+  display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  flex-wrap:wrap;padding:9px 14px;border-bottom:1px solid var(--rule);
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--muted);
+}
+.readout-head b{color:var(--signal);font-weight:600;letter-spacing:.13em}
+.readout-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));
+}
+.rcell{padding:11px 14px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.rcell dt{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 3px;
+}
+.rcell dd{
+  margin:0;font-family:var(--f-mono);font-size:14px;font-weight:500;
+  font-variant-numeric:tabular-nums;color:var(--ink);
+}
+.rcell dd .drift{
+  display:block;font-family:var(--f-body);font-size:11px;font-weight:500;font-style:italic;
+  color:var(--ink);letter-spacing:0;margin-top:3px;line-height:1.4;
+  padding-left:9px;border-left:2px solid var(--ink);
+}
+.rcell dd .drift.quiet{font-weight:400;font-style:normal;color:var(--muted);border-left-color:var(--rule)}
+
+/* ---------- layout ---------- */
+.shell{display:grid;grid-template-columns:210px minmax(0,1fr);gap:52px;padding:44px 0 72px}
+@media (max-width:900px){.shell{grid-template-columns:1fr;gap:26px;padding-top:28px}}
+
+nav.rail{position:sticky;top:22px;align-self:start;font-size:13.5px}
+@media (max-width:900px){
+  nav.rail{position:static;border:1px solid var(--rule);border-radius:3px;background:var(--surface);padding:14px 16px}
+}
+.rail-title{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:12px;padding-bottom:9px;border-bottom:1px solid var(--rule);
+}
+.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+.rail a{
+  display:grid;grid-template-columns:22px 1fr;gap:9px;align-items:baseline;
+  color:var(--muted);text-decoration:none;padding:4px 6px 4px 0;border-radius:2px;
+  transition:color .12s;
+}
+.rail a:hover{color:var(--signal)}
+.rail a .n{
+  font-family:var(--f-mono);font-size:11px;font-variant-numeric:tabular-nums;
+  color:var(--muted);
+}
+.rail a:hover .n{color:var(--ink)}
+.rail .grp{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);opacity:.65;margin:14px 0 5px;
+}
+
+/* ---------- content ---------- */
+main{min-width:0;max-width:74ch}
+section{scroll-margin-top:22px}
+section + section{margin-top:46px;padding-top:38px;border-top:1px solid var(--rule)}
+h2{
+  font-family:var(--f-display);font-weight:700;font-size:1.62rem;line-height:1.18;
+  letter-spacing:-.014em;margin:0 0 6px;text-wrap:balance;
+  display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:baseline;
+}
+h2 .step{
+  font-family:var(--f-mono);font-size:.72rem;font-weight:600;letter-spacing:.1em;
+  color:var(--ground);background:var(--ink);
+  padding:3px 8px;border-radius:2px;white-space:nowrap;
+}
+h3{
+  font-family:var(--f-body);font-weight:600;font-size:1.02rem;letter-spacing:-.005em;
+  margin:30px 0 8px;color:var(--ink);
+}
+p{margin:0 0 14px;max-width:66ch}
+/* No hue to mark a link, so the underline carries it. */
+main a{color:var(--ink);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+main a:hover{text-decoration-thickness:2px}
+code{
+  font-family:var(--f-mono);font-size:.875em;
+  background:var(--code-ground);color:var(--code-ink);
+  padding:1px 5px;border-radius:2px;
+  overflow-wrap:break-word;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+}
+strong{font-weight:600}
+
+/* ---------- code block ---------- */
+.cb{position:relative;margin:0 0 18px;border:1px solid var(--rule);border-radius:3px;background:var(--code-ground);overflow:hidden}
+.cb-bar{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:6px 10px 6px 12px;border-bottom:1px solid var(--rule);
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);background:var(--surface);
+}
+.cb pre{margin:0;padding:13px 14px;overflow-x:auto}
+.cb code{
+  background:none;padding:0;font-size:13px;line-height:1.62;
+  color:var(--code-ink);display:block;white-space:pre;
+}
+.copy{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);background:transparent;border:1px solid var(--rule);
+  border-radius:2px;padding:2px 8px;cursor:pointer;transition:color .12s,border-color .12s;
+}
+.copy:hover{color:var(--signal);border-color:var(--signal)}
+.copy:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.copy[data-done="1"]{color:var(--ground);background:var(--ink);border-color:var(--ink)}
+
+/* ---------- callouts ---------- */
+/* Three levels, distinguished without hue: stripe weight, ground tone, and
+   chip treatment. note = quietest, warn = firm, fail = inverted chip. */
+.call{
+  border-left:2px solid var(--rule-firm);background:var(--signal-soft);
+  padding:12px 15px;margin:0 0 18px;border-radius:0 3px 3px 0;
+}
+.call p{margin:0;max-width:62ch;font-size:.95rem}
+.call p + p{margin-top:9px}
+.call .tag{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);display:block;margin-bottom:5px;font-weight:600;
+}
+.call.warn{border-left:4px solid var(--warn);background:var(--warn-soft)}
+.call.warn .tag{color:var(--ink)}
+.call.fail{border-left:7px solid var(--fail);background:var(--fail-soft)}
+.call.fail .tag{
+  display:inline-block;background:var(--ink);color:var(--ground);
+  padding:2px 7px;border-radius:2px;margin-bottom:7px;
+}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;margin:0 0 18px;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:460px}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--muted);font-weight:500;background:var(--sunk);white-space:nowrap;
+}
+tr:last-child td{border-bottom:none}
+td code{font-size:12.4px}
+.tw.num td:nth-child(2),.tw.num td:nth-child(3){font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* symptom / cause / fix table */
+.tbl-tri td:first-child{font-weight:500;width:31%}
+.tbl-tri td:nth-child(2){color:var(--muted);width:30%}
+
+ul.plain{margin:0 0 16px;padding-left:20px;max-width:66ch}
+ul.plain li{margin-bottom:7px}
+ol.steps{margin:0 0 16px;padding-left:20px;max-width:66ch}
+ol.steps li{margin-bottom:9px}
+
+.checklist td:first-child{width:34%;font-weight:500}
+
+footer{border-top:1px solid var(--rule);background:var(--surface);padding:30px 0 46px}
+footer .wrap{display:flex;justify-content:space-between;gap:22px;flex-wrap:wrap;align-items:flex-start}
+footer p{font-size:13px;color:var(--muted);margin:0;max-width:56ch}
+footer .who{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">
+      <span>Build guide</span><span class="sep">/</span>
+      <span>5G SA testbed</span><span class="sep">/</span>
+      <span>Kali Linux</span>
+    </div>
+    <h1>Open5GS <span class="plus">+</span> srsRAN on Kali</h1>
+    <p class="standfirst">
+      Building the 5G Standalone core and NR gNodeB that this dissertation testbed runs on.
+      Neither project builds out of the box here: <strong>Kali's libmongoc packaging breaks
+      the Open5GS build in three separate ways</strong>, the srsRAN GitHub repository was
+      archived in December 2025, and a stock core will start cleanly and then register nothing.
+    </p>
+
+    <div class="readout">
+      <div class="readout-head">
+        <span>Verified environment</span>
+        <span><b>Confirmed on the running testbed</b> &nbsp;2026-09-05</span>
+      </div>
+      <dl class="readout-grid">
+        <div class="rcell"><dt>Host OS</dt><dd>Kali Rolling 2026.3</dd></div>
+        <div class="rcell"><dt>Compiler</dt><dd>GCC 15.3.0</dd></div>
+        <div class="rcell"><dt>CMake</dt><dd>4.3.4</dd></div>
+        <div class="rcell"><dt>Meson / Ninja</dt><dd>1.11.1 / 1.13.2</dd></div>
+        <div class="rcell"><dt>MongoDB</dt><dd>8.0.29</dd></div>
+        <div class="rcell"><dt>libmongoc</dt><dd>2.3.3-1<span class="drift">was 2.3.1 at first build — see Step 3</span></dd></div>
+        <div class="rcell"><dt>UHD</dt><dd>4.9.0.1</dd></div>
+        <div class="rcell"><dt>Open5GS</dt><dd>v2.7.7</dd></div>
+        <div class="rcell"><dt>srsRAN Project</dt><dd>release_25_10<span class="drift quiet">commit d2f4b70</span></dd></div>
+        <div class="rcell"><dt>UERANSIM</dt><dd>v3.2.6<span class="drift quiet">optional — software UEs</span></dd></div>
+      </dl>
+    </div>
+  </div>
+</header>
+
+<div class="wrap shell">
+
+  <nav class="rail">
+    <div class="rail-title">Build sequence</div>
+    <ol>
+      <li><a href="#s0"><span class="n">00</span><span>UHD &amp; B210</span></a></li>
+      <li><a href="#s1"><span class="n">01</span><span>Dependencies</span></a></li>
+      <li><a href="#s2"><span class="n">02</span><span>MongoDB</span></a></li>
+      <li><a href="#s3"><span class="n">03</span><span>libmongoc fixups</span></a></li>
+      <li><a href="#s4"><span class="n">04</span><span>Build Open5GS</span></a></li>
+      <li><a href="#s5"><span class="n">05</span><span>Configure PLMN</span></a></li>
+      <li><a href="#s6"><span class="n">06</span><span>Subscribers</span></a></li>
+      <li><a href="#s7"><span class="n">07</span><span>Build srsRAN</span></a></li>
+      <li><a href="#s8"><span class="n">08</span><span>UERANSIM</span></a></li>
+    </ol>
+    <div class="grp">Reference</div>
+    <ol>
+      <li><a href="#bringup"><span class="n">↳</span><span>Bring-up</span></a></li>
+      <li><a href="#trouble"><span class="n">↳</span><span>Troubleshooting</span></a></li>
+      <li><a href="#params"><span class="n">↳</span><span>Parameters</span></a></li>
+      <li><a href="#legal"><span class="n">↳</span><span>Legal &amp; safety</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section id="scope">
+      <h2>Scope</h2>
+      <p>
+        This gets you to a cell that real handsets attach to, and a core that registers them.
+        It does not cover the project's NGAP proxy, feature extraction or ML pipeline.
+      </p>
+      <p>
+        The order below is load-bearing. Step 3 must complete before Step 4 or the Open5GS
+        build fails at the first <code>#include</code>; Step 5 must complete before anything
+        registers at all.
+      </p>
+      <h3>Hardware</h3>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Item</th><th>Requirement</th></tr></thead>
+          <tbody>
+            <tr><td>SDR</td><td>USRP B210, on a <strong>genuine USB 3.0 port</strong>. 20 MHz n78 needs 23.04 Msps, which USB 2.0 cannot sustain.</td></tr>
+            <tr><td>UEs</td><td>5G SA handsets with programmable MILENAGE USIMs, and/or UERANSIM software UEs</td></tr>
+            <tr><td>RF containment</td><td>Faraday bag or shielded room. Band n78 is licensed spectrum.</td></tr>
+            <tr><td>Host</td><td>≥16 GB RAM</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="s0">
+      <h2><span class="step">Step 00</span>UHD firmware and B210 detection</h2>
+      <p>One-time per machine:</p>
+      <div class="cb"><div class="cb-bar"><span>shell</span><button class="copy" type="button">Copy</button></div><pre><code>uhd_images_downloader        # FPGA images → /usr/lib/uhd/images/
+uhd_find_devices             # expect: type=b200, plus your board serial</code></pre></div>
+      <div class="call warn">
+        <span class="tag">Verify before you build</span>
+        <p><code>uhd_find_devices</code> succeeding is <strong>not</strong> proof the link is fast
+        enough — it succeeds on USB 2.0 too. Check the negotiated speed now, rather than after an
+        hour of compiling.</p>
+      </div>
+      <div class="cb"><div class="cb-bar"><span>shell</span><button class="copy" type="button">Copy</button></div><pre><code>lsusb -t   # the B210 line must end in 5000M (USB 3.0), not 480M (USB 2.0)</code></pre></div>
+    </section>
+
+    <section id="s1">
+      <h2><span class="step">Step 01</span>System dependencies</h2>
+      <div class="cb"><div class="cb-bar"><span>shell</span><button class="copy" type="button">Copy</button></div><pre><code>sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  meson ninja-build build-essential flex bison \
+  cmake libsctp-dev libgnutls28-dev libgcrypt-dev \
+  libssl-dev libidn11-dev libbson-dev libmicrohttpd-dev \
+  libcurl4-gnutls-dev libnghttp2-dev libyaml-dev \
+  libtalloc-dev libpcsclite-dev pcscd libtins-dev \
+  libfftw3-dev libmbedtls-dev libboost-all-dev \
+  libconfig++-dev libyaml-cpp-dev libzmq3-dev cppzmq-dev \
+  libuhd-dev uhd-host python3-pip</code></pre></div>
+      <div class="call">
+        <span class="tag">If apt refuses to run</span>
+        <p>A "dpkg was interrupted" error is typically an abandoned interactive <code>iperf3</code>
+        postinst prompt. Clear it non-interactively:
+        <code>sudo DEBIAN_FRONTEND=noninteractive dpkg --configure -a</code></p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2><span class="step">Step 02</span>MongoDB 8.0</h2>
+      <p>Kali has no MongoDB package of its own — use the upstream Debian repository.</p>
+      <div class="cb"><div class="cb-bar"><span>shell</span><button class="copy" type="button">Copy</button></div><pre><code>curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | \
+  sudo gpg --dearmor -o /usr/share/keyrings/mongodb-server-8.0.gpg
+
+echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] \
+  https://repo.mongodb.org/apt/debian bookworm/mongodb-org/8.0 main" | \
+  sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+
+sudo apt-get update &amp;&amp; sudo apt-get install -y mongodb-org
+sudo mkdir -p /var/lib/mongodb /var/log/mongodb
+sudo mongod --dbpath /var/lib/mongodb --logpath /var/log/mongodb/mongod.log --fork
+
+mongosh --quiet --eval "db.adminCommand('ping')"</code></pre></div>
+    </section>
+
+    <section id="s3">
+      <h2><span class="step">Step 03</span>Kali libmongoc fixups</h2>
+      <p>
+        This is what makes a Kali install differ from the upstream Open5GS instructions, and
+        the step most likely to break again later.
+      </p>
+      <p>
+        Debian and Kali ship libmongoc 2.x under the <code>mongoc2</code> name, with headers in a
+        versioned directory and a pkg-config file that does not use the upstream name. Open5GS
+        2.7.7 expects the 1.x layout — a <code>libmongoc-1.0.pc</code> and a top-level
+        <code>&lt;mongoc.h&gt;</code>. Three distinct failures follow.
+      </p>
+
+      <h3>Fix 1 — pkg-config name symlinks</h3>
+      <div class="cb"><div class="cb-bar"><span>shell</span><button class="copy" type="button">Copy</button></div><pre><code>PC=/usr/lib/x86_64-linux-gnu/pkgconfig
+sudo ln -sf $PC/mongoc2.pc        $PC/libmongoc-1.0.pc
+sudo ln -sf $PC/mongoc2-static.pc $PC/libmongoc-static-1.0.pc
+sudo ln -sf $PC/bson2.pc          $PC/libbson-1.0.pc
+sudo ln -sf $PC/bson2-static.pc   $PC/libbson-static-1.0.pc</code></pre></div>
+      <div class="call fail">
+        <span class="tag">Without this</span>
+        <p><code>meson setup</code> fails with <code>Dependency libmongoc-1.0 not found</code>.</p>
+      </div>
+
+      <h3>Fix 2 — header shims</h3>
+      <p>
+        Kali installs headers at <code>/usr/include/mongoc-&lt;version&gt;/mongoc/mongoc.h</code>,
+        but Open5GS does <code>#include &lt;mongoc.h&gt;</code>. Create a one-line shim at the top
+        of each versioned include directory.
+      </p>
+      <div class="call warn">
+        <span class="tag">Derive the paths — don't hardcode the version</span>
+        <p>This testbed was first built against mongoc 2.3.1; Kali has since moved to 2.3.3.
+        A shim written for one version is silently invisible to the next, and the build then fails
+        with the same <code>fatal error: mongoc.h: No such file or directory</code> as if the fixup
+        had never been applied at all.</p>
+      </div>
+      <div class="cb"><div class="cb-bar"><span>shell</span><button class="copy" type="button">Copy</button></div><pre><code>MONGOC_INC="$(pkg-config --variable=prefix libmongoc-1.0)/include/mongoc-$(pkg-config --modversion libmongoc-1.0)"
+BSON_INC="$(pkg-config --variable=prefix libbson-1.0)/include/bson-$(pkg-config --modversion libbson-1.0)"
+
+echo '#include "mongoc/mongoc.h"' | sudo tee "$MONGOC_INC/mongoc.h"
+echo '#include "bson/bson.h"'     | sudo tee "$BSON_INC/bson.h"</code></pre></div>
+      <p>Verify the shim resolves before building anything:</p>
+      <div class="cb"><div class="cb-bar"><span>shell</span><button class="copy" type="button">Copy</button></div><pre><code>printf '#include &lt;mongoc.h&gt;\n#include &lt;bson.h&gt;\nint main(void){return 0;}\n' &gt; /tmp/probe.c
+gcc $(pkg-config --cflags libmongoc-1.0) -c /tmp/probe.c -o /dev/null &amp;&amp; echo "shim OK"</code></pre></div>
+      <div class="call warn">
+        <span class="tag">Re-run after any libmongoc upgrade</span>
+        <p>The shims live inside the versioned include directory, so an <code>apt upgrade</code>
+        that bumps <code>libmongoc-dev</code> strands them in the old directory. Existing binaries
+        keep working — only rebuilds break, which makes this a confusing failure to hit months later.</p>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2><span class="step">Step 04</span>Build Open5GS 2.7.7</h2>
+      <div class="cb"><div class="cb-bar"><span>shell</span><button class="copy" type="button">Copy</button></div><pre><code>git clone --depth 1 --branch v2.7.7 https://github.com/open5gs/open5gs.git
+cd open5gs</code></pre></div>
+
+      <h3>Fix 3 — disable the bundled test suite</h3>
+      <p>
+        <code>tests/common/context.c</code> calls <code>mongoc_collection_count()</code>, removed
+        in libmongoc 2.x. The tests fail to compile even though the daemons build fine.
+      </p>
+      <div class="cb"><div class="cb-bar"><span>shell</span><button class="copy" type="button">Copy</button></div><pre><code>sed -i 's/^if build_tests/if false # build_tests/' meson.build</code></pre></div>
+      <p>
+        A build-only change: it disables Open5GS's own unit tests and touches no core
+        functionality, which is why the repository ships no patch file for it.
+      </p>
+
+      <h3>Build and install</h3>
+      <div class="cb"><div class="cb-bar"><span>shell</span><button class="copy" type="button">Copy</button></div><pre><code>meson setup build --prefix=/usr/local
+ninja -C build -j"$(nproc)"
+sudo ninja -C build install
+sudo ldconfig
+
+/usr/local/bin/open5gs-amfd -v     # Open5GS v2.7.7</code></pre></div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Artefact</th><th>Location</th></tr></thead>
+          <tbody>
+            <tr><td>Binaries</td><td><code>/usr/local/bin/open5gs-*d</code></td></tr>
+            <tr><td>Configs</td><td><code>/usr/local/etc/open5gs/*.yaml</code></td></tr>
+            <tr><td>SUCI home-network keys</td><td><code>/usr/local/etc/open5gs/hnet/</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2><span class="step">Step 05</span>Configure Open5GS for PLMN 001/01</h2>
+      <div class="call fail">
+        <span class="tag">Symptom if you skip this</span>
+        <p>A stock install starts, registers nothing, and returns <code>504 Gateway Timeout</code>
+        on every discovery request. Four separate config problems cause it, and
+        <strong>all four must be fixed together</strong> — fixing three still yields a dead core.</p>
+      </div>
+
+      <h3>1 — NRF must allow the test PLMN</h3>
+      <p><code>nrf.yaml</code> defaults to <code>mcc: 999, mnc: 70</code> and rejects every NF
+      registering as anything else: <code>PLMN-ID[MCC:001,MNC:01] is not allowed</code>.</p>
+      <div class="cb"><div class="cb-bar"><span>nrf.yaml</span><button class="copy" type="button">Copy</button></div><pre><code>nrf:
+  serving:
+    - plmn_id:
+        mcc: 001
+        mnc: 01
+  sbi:
+    server:
+      - address: 127.0.0.10
+        port: 7777</code></pre></div>
+
+      <h3>2 — Every NF needs an explicit serving section</h3>
+      <p><code>ausf</code>, <code>udm</code>, <code>udr</code>, <code>pcf</code>,
+      <code>nssf</code> and <code>bsf</code> ship without one, so they register under the default
+      PLMN 999/70 and the AMF cannot discover them for 001/01.</p>
+      <div class="cb"><div class="cb-bar"><span>each NF yaml</span><button class="copy" type="button">Copy</button></div><pre><code>&lt;nf&gt;:
+  serving:
+    - plmn_id:
+        mcc: 001
+        mnc: 01</code></pre></div>
+
+      <h3>3 — Route through the NRF, not the SCP</h3>
+      <p>Every NF config defaults to <code>client.scp: http://127.0.0.200:7777</code>. The SCP
+      expects a SEPP for inter-PLMN routing, which a single-PLMN private network does not have,
+      so discovery fails with <code>No SEPP configured</code>. Change <code>client.scp</code> to
+      <code>client.nrf</code> in <em>every</em> NF config.</p>
+      <div class="cb"><div class="cb-bar"><span>each NF yaml</span><button class="copy" type="button">Copy</button></div><pre><code>  sbi:
+    client:
+      nrf:
+        - uri: http://127.0.0.10:7777</code></pre></div>
+
+      <h3>4 — SBI address map</h3>
+      <div class="tw">
+        <table>
+          <thead><tr><th>NF</th><th>SBI address</th><th>NF</th><th>SBI address</th></tr></thead>
+          <tbody>
+            <tr><td>NRF</td><td><code>127.0.0.10</code></td><td>UDM</td><td><code>127.0.0.12</code></td></tr>
+            <tr><td>SMF</td><td><code>127.0.0.4</code></td><td>PCF</td><td><code>127.0.0.13</code></td></tr>
+            <tr><td>AMF</td><td><code>127.0.0.5</code></td><td>NSSF</td><td><code>127.0.0.14</code></td></tr>
+            <tr><td>UPF</td><td><code>127.0.0.7</code></td><td>BSF</td><td><code>127.0.0.15</code></td></tr>
+            <tr><td>AUSF</td><td><code>127.0.0.11</code></td><td>UDR</td><td><code>127.0.0.20</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>AMF — NGAP, GUAMI, TAI and network name</h3>
+      <div class="cb"><div class="cb-bar"><span>amf.yaml</span><button class="copy" type="button">Copy</button></div><pre><code>amf:
+  sbi:
+    server:
+      - address: 127.0.0.5
+        port: 7777
+    client:
+      nrf:
+        - uri: http://127.0.0.10:7777
+  ngap:
+    server:
+      - address: 127.0.0.5
+  guami:
+    - plmn_id: { mcc: 001, mnc: 01 }
+      amf_id: { region: 2, set: 1 }
+  tai:
+    - plmn_id: { mcc: 001, mnc: 01 }
+      tac: 1
+  plmn_support:
+    - plmn_id: { mcc: 001, mnc: 01 }
+      s_nssai:
+        - sst: 1
+  security:
+    integrity_order: [NIA2, NIA1, NIA0]
+    ciphering_order: [NEA0, NEA1, NEA2]
+  network_name:
+    full: srsRAN 5G Test
+    short: srsTest
+  amf_name: open5gs-amf0
+  time:
+    t3512:
+      value: 540</code></pre></div>
+
+      <h3>SMF and UPF — UE subnet</h3>
+      <div class="cb"><div class="cb-bar"><span>smf.yaml &amp; upf.yaml</span><button class="copy" type="button">Copy</button></div><pre><code>  session:
+    - subnet: 10.45.0.0/16
+      gateway: 10.45.0.1
+      dnn: internet</code></pre></div>
+      <p>
+        <code>smf.yaml</code> additionally takes DNS (<code>8.8.8.8</code>, <code>8.8.4.4</code>)
+        and <code>mtu: 1400</code>. The <code>gtpc</code>/<code>gtpu</code> and
+        <code>freeDiameter</code> entries in the installed file are 4G EPC legacy, unused in
+        5G SA — leave them alone.
+      </p>
+      <div class="call warn">
+        <span class="tag">ogstun comes up DOWN</span>
+        <p>The UPF creates the TUN interface but neither brings it up nor assigns the gateway
+        address. Until you do, a UE gets an IP and passes no traffic.</p>
+      </div>
+      <div class="cb"><div class="cb-bar"><span>shell</span><button class="copy" type="button">Copy</button></div><pre><code>sudo ip link set ogstun up
+sudo ip addr add 10.45.0.1/16 dev ogstun</code></pre></div>
+
+      <h3>UDM home-network keys</h3>
+      <p>
+        <code>udm.yaml</code> references six SUCI concealment keys under
+        <code>/usr/local/etc/open5gs/hnet/</code>, installed by <code>ninja install</code>.
+        <strong>UDM will not start if they are missing.</strong> Test USIMs using the SUCI
+        null-scheme never exercise them, but they must still be present.
+      </p>
+    </section>
+
+    <section id="s6">
+      <h2><span class="step">Step 06</span>Provision subscribers</h2>
+      <p>
+        Subscribers go directly into MongoDB. The full profile set — five physical USIMs and three
+        UERANSIM software profiles — is in <code>COMP997_srsRAN_subscribers.md</code>, with a
+        ready-to-paste <code>insertMany</code> block.
+      </p>
+      <div class="call">
+        <span class="tag">Key material</span>
+        <p>Ki and OPc are redacted throughout the public repository. Substitute your own USIM
+        credentials for the <code>REDACTED</code> placeholders. The IMSI prefix
+        <code>001010000000xxx</code> is not sensitive: MCC 001 / MNC 01 is the 3GPP test PLMN,
+        assigned to no real operator.</p>
+      </div>
+      <div class="cb"><div class="cb-bar"><span>mongosh — document shape</span><button class="copy" type="button">Copy</button></div><pre><code>{
+  imsi: "001010000000001",
+  msisdn: [], imeisv: [],
+  security: { k: "REDACTED", op: null, opc: "REDACTED",
+              amf: "8000", sqn: NumberLong("0") },
+  ambr: { downlink: { value: 1, unit: 3 }, uplink: { value: 1, unit: 3 } },
+  slice: [{ sst: 1, default_indicator: true,
+            session: [{ name: "internet", type: 3,
+                        ambr: { downlink: { value: 1, unit: 3 },
+                                uplink:   { value: 1, unit: 3 } },
+                        qos: { index: 9, arp: { priority_level: 8,
+                               pre_emption_capability: 1,
+                               pre_emption_vulnerability: 1 } } }] }],
+  access_restriction_data: 32, network_access_mode: 0,
+  subscriber_status: 0, operator_determined_barring: 0, __v: 0
+}</code></pre></div>
+      <div class="cb"><div class="cb-bar"><span>verify</span><button class="copy" type="button">Copy</button></div><pre><code>mongosh open5gs --eval 'db.subscribers.find({}, {imsi:1, _id:0}).sort({imsi:1})'</code></pre></div>
+      <div class="call">
+        <span class="tag">First attach always logs one auth failure</span>
+        <p>A new SIM's first attach logs
+        <code>Authentication failure(Synch failure[count=0])</code>. That is normal MILENAGE SQN
+        resync and registration completes on the immediate retry. If authentication keeps failing,
+        reset: <code>mongosh open5gs --eval 'db.subscribers.updateMany({}, {$set: {"security.sqn": NumberLong("0")}})'</code></p>
+      </div>
+    </section>
+
+    <section id="s7">
+      <h2><span class="step">Step 07</span>Build srsRAN Project 25.10</h2>
+      <div class="call fail">
+        <span class="tag">The repository is archived</span>
+        <p>srsRAN_Project was archived on GitHub in December 2025. Its default branch now holds
+        only a README pointing at GitLab — so a plain <code>git clone</code> appears to succeed
+        and gives you nothing. You must clone an explicit release tag.</p>
+      </div>
+      <div class="cb"><div class="cb-bar"><span>shell</span><button class="copy" type="button">Copy</button></div><pre><code>git clone --depth 1 --branch release_25_10 https://github.com/srsran/srsRAN_Project.git
+mkdir -p srsRAN_Project/build &amp;&amp; cd srsRAN_Project/build
+
+cmake .. \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DENABLE_EXPORT=ON \
+  -DENABLE_UHD=ON \
+  -DENABLE_ZEROMQ=ON \
+  -DBUILD_TESTING=OFF
+
+make -j"$(nproc)" gnb</code></pre></div>
+      <p>
+        Binary lands at <code>build/apps/gnb/gnb</code>. srsRAN builds cleanly under GCC 15 — unlike
+        Open5GS, it needs no patches. It also declares
+        <code>cmake_minimum_required(VERSION 3.14)</code>, comfortably above the 3.5 floor CMake 4.x
+        enforces, so no <code>CMAKE_POLICY_VERSION_MINIMUM</code> workaround is needed.
+      </p>
+
+      <h3>gNB configuration</h3>
+      <div class="cb"><div class="cb-bar"><span>gnb.yml</span><button class="copy" type="button">Copy</button></div><pre><code>cu_cp:
+  amf:
+    addr: 127.0.0.5
+    port: 38412
+    bind_addr: 127.0.0.1
+    supported_tracking_areas:
+      - tac: 1
+        plmn_list:
+          - plmn: "00101"
+            tai_slice_support_list:
+              - sst: 1
+
+ru_sdr:
+  device_driver: uhd
+  device_args: type=b200,serial=YOUR_B210_SERIAL,num_recv_frames=64,num_send_frames=64
+  srate: 23.04
+  otw_format: sc12
+  tx_gain: 89
+  rx_gain: 50
+
+cell_cfg:
+  dl_arfcn: 632628
+  band: 78
+  channel_bandwidth_MHz: 20
+  common_scs: 30
+  plmn: "00101"
+  tac: 1
+  pci: 1
+
+log:
+  filename: /tmp/gnb.log
+  all_level: info</code></pre></div>
+      <p>Two settings are not optional:</p>
+      <ul class="plain">
+        <li><code>num_recv_frames=64,num_send_frames=64</code> — without these the B210 underruns
+        regardless of USB generation.</li>
+        <li><code>tx_gain: 89</code> (the B210 maximum) and <code>rx_gain: 50</code>. At
+        <code>tx_gain: 80</code> some handsets never saw the cell while others attached fine — a
+        confusing failure, because the cell is genuinely on-air throughout.</li>
+      </ul>
+    </section>
+
+    <section id="s8">
+      <h2><span class="step">Step 08</span>UERANSIM v3.2.6 <span style="font-family:var(--f-body);font-weight:400;font-size:.95rem;color:var(--muted)">— optional</span></h2>
+      <p>
+        Only needed for the SW-Std / SW-Ext / SW-Min software UE profiles. Skip if you are working
+        with physical handsets only.
+      </p>
+      <h3>Kali / GCC 15 build fixups</h3>
+      <p>
+        UERANSIM's 2022-era code relies on standard-library headers that older GCC pulled in
+        transitively; GCC 15 does not. Two changes:
+      </p>
+      <ol class="steps">
+        <li><code>src/ext/yaml-cpp/emitterutils.cpp</code> — add <code>#include &lt;cstdint&gt;</code>.</li>
+        <li>Top-level <code>CMakeLists.txt</code> — force-include globally, which is cheaper than
+        patching every offending file:</li>
+      </ol>
+      <div class="cb"><div class="cb-bar"><span>CMakeLists.txt</span><button class="copy" type="button">Copy</button></div><pre><code>set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include cstdint -include cstring -include cstdio -include string")</code></pre></div>
+
+      <h3>Capability-enquiry patch</h3>
+      <div class="call warn">
+        <span class="tag">Stock UERANSIM never sends the message this project studies</span>
+        <p>There is no RRC <code>UECapabilityEnquiry</code> / <code>UECapabilityInformation</code>
+        implementation on either the gNB or the UE side, so no
+        <code>UERadioCapabilityInfoIndication</code> is ever emitted — meaning the NGAP proxy has
+        nothing to intercept for software profiles. <code>ueransim.patch</code> in the repository
+        adds it.</p>
+      </div>
+      <div class="cb"><div class="cb-bar"><span>shell</span><button class="copy" type="button">Copy</button></div><pre><code>git apply /path/to/ueransim.patch
+cp /path/to/ueransim-config/gnb.yaml config/gnb.yaml
+make build      # produces build/nr-gnb, build/nr-ue, build/nr-cli</code></pre></div>
+      <div class="call">
+        <span class="tag">Two known quirks</span>
+        <p>If <code>nr-gnb</code> is left running across a restart of whatever it connects to, it
+        can wedge in a broken internal AMF-context state (<code>AMF context not found with id: 0</code>)
+        while its SCTP transport still looks healthy. Restart it fresh rather than trusting its
+        reconnect logic.</p>
+        <p>Its GTP/UDP task will also fail to bind (<code>Address already in use</code>) when a real
+        srsRAN gNB is running, since both claim port 2152 on loopback. Harmless for NGAP signalling;
+        user-plane data will not flow for UERANSIM UEs in that configuration.</p>
+      </div>
+    </section>
+
+    <section id="bringup">
+      <h2>Bring-up and verification</h2>
+      <p>
+        Start order matters: MongoDB, then NRF and SCP, then the remaining NFs, then AMF and SMF,
+        then UPF, then the gNB.
+      </p>
+      <div class="cb"><div class="cb-bar"><span>minimal manual sequence</span><button class="copy" type="button">Copy</button></div><pre><code>sudo mongod --dbpath /var/lib/mongodb --logpath /var/log/mongodb/mongod.log --fork
+
+for nf in nrf scp ausf udm udr pcf nssf bsf amf smf upf; do
+  sudo /usr/local/bin/open5gs-${nf}d &gt; /tmp/${nf}.log 2&gt;&amp;1 &amp;
+  sleep 1
+done
+
+sudo ip link set ogstun up
+sudo ip addr add 10.45.0.1/16 dev ogstun 2&gt;/dev/null || true
+sudo sysctl -w net.ipv4.ip_forward=1
+
+UPLINK=$(ip route show default | awk '{print $5; exit}')
+sudo iptables -t nat -A POSTROUTING -s 10.45.0.0/16 -o "$UPLINK" -j MASQUERADE
+
+sudo /path/to/srsRAN_Project/build/apps/gnb/gnb \
+  -c /root/.config/open5gs/gnb.yml &gt; /tmp/gnb.log 2&gt;&amp;1 &amp;</code></pre></div>
+
+      <h3>Verification checklist</h3>
+      <div class="tw">
+        <table class="checklist">
+          <thead><tr><th>Check</th><th>Command</th><th>Expect</th></tr></thead>
+          <tbody>
+            <tr><td>AMF listening on N2</td><td><code>ss -lntu | grep 38412</code></td><td>a listening socket</td></tr>
+            <tr><td>NG Setup succeeded</td><td><code>grep -i "ng setup" /tmp/gnb.log</code></td><td>success, PLMN 00101</td></tr>
+            <tr><td>UE registered</td><td><code>grep "Registration complete" /tmp/amf.log</code></td><td>one line per UE</td></tr>
+            <tr><td>UE got an IP</td><td><code>grep "UE IPv4" /tmp/smf.log</code></td><td>address in 10.45.0.0/16</td></tr>
+            <tr><td>Data path</td><td><code>ping -I ogstun 10.45.0.2</code></td><td>replies</td></tr>
+            <tr><td>RF underflows</td><td><code>grep -c underflow /tmp/gnb.log</code></td><td>near zero</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:.9rem;color:var(--muted)">
+        Open5GS logs carry ANSI colour codes; strip them with
+        <code>sed 's/\x1b\[[0-9;]*m//g'</code> before grepping if matches look oddly absent.
+      </p>
+
+      <h3>Confirming the cell is actually transmitting</h3>
+      <p>
+        Protocol-level evidence is the primary check: PRACH detection in <code>/tmp/gnb.log</code>,
+        NG Setup, and a successful registration. For an independent RF-layer confirmation, a
+        wideband <code>hackrf_sweep</code> is <em>not</em> reliable — it produces noisy readings with
+        no stable peak. Use GQRX narrowband instead.
+      </p>
+      <div class="tw num">
+        <table>
+          <thead><tr><th>GQRX setting</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Frequency</td><td><code>3489420000</code> Hz</td></tr>
+            <tr><td>Sample rate</td><td><code>20000000</code></td></tr>
+            <tr><td>LNA / IF gain</td><td>16 dB</td></tr>
+            <tr><td>VGA / BB gain</td><td>20 dB</td></tr>
+            <tr><td>RF amp</td><td>off — the B210 transmits at max gain right beside it</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        The carrier appears as a sharp spike around −35 to −40 dBFS against a −85 to −90 dBFS noise
+        floor, with visible TDD burst structure in the waterfall.
+      </p>
+      <div class="call warn">
+        <span class="tag">Two GQRX traps</span>
+        <p>The LNA / VGA / RF-amp sliders live in the <strong>Input controls</strong> tab of the
+        Receiver Options dock, <em>not</em> in "Configure I/O devices". And GQRX does not auto-start
+        — click ▶ (Start/Stop DSP) or the waterfall stays black no matter how correct your settings
+        are.</p>
+      </div>
+    </section>
+
+    <section id="trouble">
+      <h2>Troubleshooting</h2>
+      <p>Install-time and bring-up failures encountered on this testbed, with root causes.</p>
+      <div class="tw">
+        <table class="tbl-tri">
+          <thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td><code>apt-get</code> fails: "dpkg was interrupted"</td><td>Abandoned interactive postinst prompt</td><td><code>DEBIAN_FRONTEND=noninteractive dpkg --configure -a</code></td></tr>
+            <tr><td>meson: <code>Dependency libmongoc-1.0 not found</code></td><td>Kali names the file <code>mongoc2.pc</code></td><td>pkg-config symlinks — Step 3, Fix 1</td></tr>
+            <tr><td><code>fatal error: mongoc.h: No such file or directory</code></td><td>Headers live at <code>mongoc-&lt;ver&gt;/mongoc/mongoc.h</code></td><td>Header shims — Step 3, Fix 2. <strong>If this appears after a previously working build, <code>libmongoc-dev</code> was upgraded and the shim is stranded in the old directory.</strong></td></tr>
+            <tr><td><code>implicit declaration of function 'mongoc_collection_count'</code></td><td>Removed in libmongoc 2.x; Open5GS tests still call it</td><td>Disable tests — Step 4, Fix 3</td></tr>
+            <tr><td><code>git clone</code> of srsRAN yields only a README</td><td>GitHub repo archived Dec 2025</td><td>Clone <code>--branch release_25_10</code></td></tr>
+            <tr><td>Every AMF discovery returns 504; SCP logs <code>No SEPP configured</code></td><td>NFs routing via SCP, which needs a SEPP</td><td><code>client.scp</code> → <code>client.nrf</code></td></tr>
+            <tr><td>NRF logs <code>PLMN-ID[MCC:001,MNC:01] is not allowed</code></td><td><code>nrf.yaml</code> still serving default 999/70</td><td>Step 5, item 1</td></tr>
+            <tr><td>AMF discovery for AUSF/UDM returns empty</td><td>Those NFs registered under PLMN 999/70</td><td>Add <code>serving:</code> to every NF</td></tr>
+            <tr><td>UDM will not start</td><td>Missing <code>hnet/</code> SUCI key files</td><td>Reinstall — they come from <code>ninja install</code></td></tr>
+            <tr><td>UE gets an IP but no traffic; <code>ping -I ogstun</code> → "Network is unreachable"</td><td>UPF leaves <code>ogstun</code> DOWN</td><td><code>ip link set ogstun up</code></td></tr>
+            <tr><td>One handset sees the cell, another does not</td><td><code>tx_gain</code> too low for that device at that distance</td><td><code>tx_gain: 89</code>, <code>rx_gain: 50</code></td></tr>
+            <tr><td>Thousands of <code>Real-time failure in RF: underflow</code>, despite NG Setup succeeding</td><td>B210 on USB 2.0. <strong>Both <code>lsusb</code> and <code>uhd_find_devices</code> succeed on USB 2.0 — presence is not proof of link speed.</strong></td><td>Move to a true USB 3.0 (<code>xhci_hcd</code>) root hub; confirm <code>5000M</code> in <code>lsusb -t</code>. Isolated single-slot underflows under load remain normal.</td></tr>
+            <tr><td>UE registers but never gets a PDU session; gNB loops <code>UE did not request a PDU session … Requesting UE release</code></td><td>Device's APN/DNN profile requests something other than <code>internet</code> (often <code>ims</code>) with no fallback</td><td>Fix on the <strong>device's</strong> APN config, not the network. Check <code>/tmp/amf.log</code> for the requested DNN.</td></tr>
+            <tr><td>Recurring <code>Ue requested DNN "ims" Not Supported</code> every ~16s</td><td>Handset probing for a VoNR/IMS bearer Open5GS does not provide</td><td>Harmless. Disable VoNR on the handset, or ignore.</td></tr>
+            <tr><td>Registration succeeds, then drops every 15–90s</td><td>RF link quality — PUSCH SINR collapsing to −20…−35 dB means uplink is failing outright</td><td>Antenna positioning. Not a software fault.</td></tr>
+            <tr><td>CPE unreachable by <code>ping</code> despite a working session</td><td>Many CPEs silently drop unsolicited ICMP</td><td>Check for live flows instead: <code>tcpdump -i ogstun host &lt;ip&gt;</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="params">
+      <h2>Network parameters</h2>
+      <div class="tw num">
+        <table>
+          <tbody>
+            <tr><th>MCC / MNC</th><td>001 / 01 &nbsp;<span style="color:var(--muted)">(3GPP test PLMN)</span></td></tr>
+            <tr><th>TAC</th><td>1</td></tr>
+            <tr><th>Band</th><td>n78 &nbsp;<span style="color:var(--muted)">(TDD, 3300–3800 MHz)</span></td></tr>
+            <tr><th>DL ARFCN</th><td>632628 &nbsp;<span style="color:var(--muted)">(3489.42 MHz)</span></td></tr>
+            <tr><th>SSB ARFCN</th><td>632256</td></tr>
+            <tr><th>Channel bandwidth</th><td>20 MHz</td></tr>
+            <tr><th>Subcarrier spacing</th><td>30 kHz</td></tr>
+            <tr><th>S-NSSAI</th><td>SST=1 &nbsp;<span style="color:var(--muted)">(eMBB)</span></td></tr>
+            <tr><th>AMF NGAP</th><td>127.0.0.5:38412</td></tr>
+            <tr><th>UE IP pool</th><td>10.45.0.0/16</td></tr>
+            <tr><th>UPF TUN</th><td>ogstun &nbsp;<span style="color:var(--muted)">(10.45.0.1/16)</span></td></tr>
+            <tr><th>DNN</th><td>internet</td></tr>
+            <tr><th>DNS</th><td>8.8.8.8, 8.8.4.4</td></tr>
+            <tr><th>TX / RX gain</th><td>89 dB / 50 dB</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="legal">
+      <h2>Legal and safety</h2>
+      <p>
+        Band n78 is licensed spectrum. Transmit only inside a Faraday enclosure or shielded room,
+        or under a licence that permits it. The PLMN 001/01 used throughout is the 3GPP test
+        network, assigned to no real operator, which keeps a stray UE from mistaking this cell for
+        a commercial one — but that is not a substitute for RF containment.
+      </p>
+      <p>
+        This testbed exists to study attacks against capability negotiation on a private network
+        with subscribers you control. Do not point it at devices or subscribers that are not yours.
+      </p>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>
+      Companion to <code>docs/INSTALL-kali.md</code> in the 5G SA capability bidding-down
+      detection repository. Every version and command above was verified against the running
+      testbed, not transcribed from notes.
+    </p>
+    <div class="who">COMP997 · Private 5G SA testbed</div>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll(".copy").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    var code = btn.closest(".cb").querySelector("code");
+    var text = code.innerText;
+    var done = function () {
+      btn.textContent = "Copied";
+      btn.dataset.done = "1";
+      setTimeout(function () {
+        btn.textContent = "Copy";
+        btn.dataset.done = "";
+      }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () {
+        btn.textContent = "Select manually";
+        setTimeout(function () { btn.textContent = "Copy"; }, 1600);
+      });
+    } else {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) { btn.textContent = "Select manually"; }
+      document.body.removeChild(ta);
+    }
+  });
+});
+</script>
+</body>
+</html>

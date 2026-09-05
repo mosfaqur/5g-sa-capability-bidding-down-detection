@@ -37,6 +37,7 @@ behind every result in this repository can be independently re-verified.
 | `sim/` | Physical Universal Subscriber Identity Module (USIM) programming tools and findings (`flash_ue.py`, `grsp_tool.py`, `SIM_FINDINGS.md`); key material has been redacted, see Security note below |
 | `ueransim.patch`, `ueransim-config/` | This project's modifications to UERANSIM (see UERANSIM patch below) |
 | `COMP997_srsRAN_subscribers.md` | Subscriber/UE profile configuration (Ki/OPc redacted) |
+| `docs/INSTALL-kali.md` | Build and bring-up instructions for the third-party 5G stack (Open5GS, srsRAN Project, UERANSIM) on Kali Linux |
 | `chain_of_custody.log` | The append-only SHA-256 hash-chain evidence custody log |
 | `logs/collection_manifest.csv` | Per-event manifest (session, profile, label, PCAP path, registration outcome, proxy latency) for the full dataset collection campaign |
 
@@ -109,8 +110,8 @@ cp /path/to/ueransim-config/gnb.yaml config/gnb.yaml
 make build
 ```
 
-Kali Linux/GNU Compiler Collection (GCC) 15 build fixups may additionally be required, although
-the details of these are kept in the project's internal build notes rather than here.
+Kali Linux/GNU Compiler Collection (GCC) 15 build fixups are additionally required; these are
+documented in `docs/INSTALL-kali.md`.
 
 ## Dependencies
 
@@ -127,8 +128,10 @@ are vendored here.
 
 The hardware behind all of this is comparatively modest: a Universal Software Radio Peripheral
 (USRP) B210 SDR and OYEITIMES programmable USIMs. Full build steps, configuration files and
-bring-up scripts are, again, documented in the project's internal build notes rather than in this
-repository.
+bring-up scripts for the srsRAN and Open5GS side of the stack are in
+[`docs/INSTALL-kali.md`](docs/INSTALL-kali.md), which covers the Kali-specific fixups (Kali's
+`libmongoc` packaging, GCC 15, the archived srsRAN repository) that neither upstream project
+documents.
 
 ## Security note
 
